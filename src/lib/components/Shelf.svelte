@@ -12,9 +12,8 @@
 <section class="container" in:fly={{y:100, duration:1000}}>
     <div class="shelf">
         <Icon src={projectIcon} name="Project" bounce={true} />
-        <Icon src={experienceIcon} name="Contact" />
-        <Icon src={contactIcon} name="meow" />
-
+        <Icon src={experienceIcon} name="Experience" />
+        <Icon src={contactIcon} name="Contact" />
         <hr>
         <Icon src={resumeIcon} name="Resume" />
 
