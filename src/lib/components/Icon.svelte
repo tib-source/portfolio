@@ -2,7 +2,7 @@
 	import { onMount } from "svelte";
 	import { spring } from "svelte/motion";
 
-    let { src, name, bounce} : { src: string, name: string, bounce: boolean} = $props();
+    let { src, name, bounce} : { src: string, name: string, bounce?: boolean} = $props();
 
     let clicked = $state(false)
     let isBouncing = $state(false);
