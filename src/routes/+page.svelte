@@ -1,6 +1,7 @@
 <script lang="ts">
 	import profilePic from '$lib/assets/me.jpeg';
-	import background from '$lib/assets/background.jpeg';
+	// import background from '$lib/assets/background.jpeg';
+	import background from '$lib/assets/swirls.png';
 	import { fade, fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import Shelf from '$lib/components/Shelf.svelte';
