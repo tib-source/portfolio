@@ -35,7 +35,7 @@
         font-family: "Londrina Solid", sans-serif;
 
         --primary: #280D1E;
-        --secondary: #a1fff9;
+        --secondary: #fde688;
     }
 
     :global(body){
@@ -64,7 +64,7 @@
             width: 100%;
             height: 100%;
             object-fit:cover;
-            opacity: 0.3;
+            opacity: 0.5;
             z-index: -9999;
         }
 
@@ -90,7 +90,7 @@
                 h1{ 
                     letter-spacing: 1rem;
                     font-size: 200px;
-                    text-shadow: 0 0 10px rgba(0, 0, 0, 0.435);
+                    text-shadow: 0 0 10px rgba(255, 255, 255, 0.435);
                 }
 
 
@@ -102,12 +102,14 @@
                     font-size: 1.5rem;
                     font-weight: 200;
                     letter-spacing: 1px;
-                    text-shadow: 0 0 10px black;
+                    text-shadow: 0 0 10px rgba(0, 0, 0, 0.385);
                 }
 
                 span{
                     font-weight: 250;
                     color: var(--secondary);
+                    text-shadow: 0 0 10px rgba(255, 255, 255, 0.435);
+
                 }
             }
         }
