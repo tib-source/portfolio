@@ -7,7 +7,7 @@
 </script>
 <section class="container" in:fly={{y:100, duration:1000}}>
     <div class="shelf">
-        <Icon src={projectIcon} name="Project" />
+        <Icon src={projectIcon} name="Project" bounce={true} />
         <Icon src={projectIcon} name="meow" />
         <Icon src={projectIcon} name="meow" />
         <Icon src={projectIcon} name="meow" />
