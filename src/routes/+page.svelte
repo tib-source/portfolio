@@ -3,6 +3,7 @@
     import background from "$lib/assets/background.jpeg";
 	import { fade, fly } from "svelte/transition";
 	import { onMount } from "svelte";
+	import Shelf from "$lib/components/Shelf.svelte";
 
     let visible = $state(false)
 
@@ -22,7 +23,7 @@
         </div>
         <img transition:fade class="me prevent-select" src={profilePic} alt="Me basking in the sun">
     </div>
-
+    <Shelf />
     {/if}
 </main>
 <style lang="scss">
@@ -33,7 +34,7 @@
         padding: 0;
         box-sizing: border-box;
         font-family: "Londrina Solid", sans-serif;
-
+        color: white;
         --primary: #280D1E;
         --secondary: #fde688;
     }
