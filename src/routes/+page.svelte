@@ -1,7 +1,8 @@
 <script lang="ts">
 	import profilePic from '$lib/assets/me.jpeg';
-	// import background from '$lib/assets/background.jpeg';
-	import background from '$lib/assets/swirls.png';
+	import background from '$lib/assets/background.jpeg';
+	// import background from '$lib/assets/swirls.png';
+	// import background from '$lib/assets/bg.jpg';
 	import { fade, fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import Shelf from '$lib/components/Shelf.svelte';
@@ -18,7 +19,7 @@
 	onMount(() => setTimeout(() => (visible = true), 10));
 </script>
 
-<main>
+<main style="--bg: url('{background}') ;">
 	{#if visible}
 		<!-- svelte-ignore a11y_missing_attribute -->
 		<img src={background} class="background" />
@@ -56,6 +57,7 @@
 		width: 100vw;
 		height: 100vh;
 		background-color: var(--primary);
+
 	}
 
 	.prevent-select {
@@ -71,13 +73,20 @@
 		overflow: hidden;
 		display: flex;
 		justify-content: center;
+		// background-color: var(--primary);
+        // background-image: var(--bg);
+        // background-size: cover;
+        // background-position: center;
+        // background-repeat: no-repeat;
+        // background-blend-mode: overlay;
+
 
 		.background {
 			position: absolute;
 			width: 100%;
 			height: 100%;
 			object-fit: cover;
-			opacity: 0.5;
+			opacity: 0.4;
 			z-index: -9999;
 		}
 
