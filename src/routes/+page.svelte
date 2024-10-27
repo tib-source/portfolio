@@ -36,7 +36,7 @@
         font-family: "Londrina Solid", sans-serif;
         color: white;
         --primary: #280D1E;
-        --secondary: #fde688;
+        --secondary: #FDBFA3;
     }
 
     :global(body){
@@ -79,10 +79,12 @@
             align-items: center;
             color: white;
             .me{ 
+                z-index: -100;
                 width: 300px;
                 aspect-ratio: 1 / 1;
                 border-radius: 50%;
-                border-bottom: .25rem solid var(--secondary);
+                box-shadow: .75rem 0 var(--secondary), 0rem 0 10rem color-mix(in srgb, var(--secondary) 30%, transparent);
+                border: .25rem solid white;
             }
 
             .text{

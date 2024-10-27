@@ -3,14 +3,21 @@
 	import { fly } from "svelte/transition";
 	import Icon from "./Icon.svelte";
     import projectIcon from "$lib/assets/icons/project.png"
+    import resumeIcon from "$lib/assets/icons/cv.png"
+    import experienceIcon from "$lib/assets/icons/experience.png"
+    import contactIcon from "$lib/assets/icons/contact.png"
+
 
 </script>
 <section class="container" in:fly={{y:100, duration:1000}}>
     <div class="shelf">
         <Icon src={projectIcon} name="Project" bounce={true} />
-        <Icon src={projectIcon} name="meow" />
-        <Icon src={projectIcon} name="meow" />
-        <Icon src={projectIcon} name="meow" />
+        <Icon src={experienceIcon} name="Contact" />
+        <Icon src={contactIcon} name="meow" />
+
+        <hr>
+        <Icon src={resumeIcon} name="Resume" />
+
     </div>
 </section>
 

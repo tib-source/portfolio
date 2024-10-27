@@ -38,7 +38,7 @@
 
     img{
         position: absolute;
-        background-color: white;
+        background-color: var(--secondary);
         padding: 0.5rem;
         border-radius: 1rem;
         object-fit: cover;
