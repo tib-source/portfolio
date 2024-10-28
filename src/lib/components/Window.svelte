@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import type { Writable } from 'svelte/store';
 
 	let {
@@ -15,6 +15,20 @@
 	let mouseCoords = { x: 0, y: 0 };
     let initialOffset = { x: 0, y: 0 };
 	let offset = $state({ x: 0, y: 0 });
+	let draggableArea: HTMLElement;
+
+	onMount(()=> { 
+		window.addEventListener('mousedown', (e)=>{
+			if (e.target == draggableArea){
+				window.addEventListener("mousemove", handleMouseMove)
+				toggleMouseDown(e, true)
+			}
+		})
+
+		window.addEventListener('mouseup', (e)=>{
+			toggleMouseDown(e, false)
+		})
+	})
 
 	const toggleMouseDown = (e: MouseEvent, value: boolean) => {
 		mouseDown = value;
@@ -25,7 +39,8 @@
 			};
 
             initialOffset = { ...offset };
-
+		}else{
+			window.removeEventListener("mousemove", handleMouseMove)
 		}
 	};
 
@@ -60,10 +75,8 @@
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
     <!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div
-		onmousemove={handleMouseMove}
-		onmousedown={(e) => toggleMouseDown(e, true)}
-		onmouseleave={(e) => toggleMouseDown(e, false)}
 		onmouseup={(e) => toggleMouseDown(e, false)}
+		bind:this={draggableArea}
 		class="helmet"
 	> <div class="close" onclick={handleClose}></div></div>
 	{#if content}
