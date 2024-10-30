@@ -8,6 +8,7 @@
 	import Shelf from '$lib/components/Shelf.svelte';
 	import Window from '$lib/components/Window.svelte';
 	import { projectsVisible, contactVisible, resumeVisible, experienceVisible} from '$lib/store';
+	import Projects from '$lib/windows/Projects.svelte';
 
 	let visible = $state(false);
     
@@ -31,8 +32,7 @@
 			</div>
 			<img transition:fade class="me prevent-select" src={profilePic} alt="Me basking in the sun" />
 		</div>
-		<Window width={700} height={500} top={0} left={700
-        } visibility={projectsVisible} />
+		<Projects width={700} height={500} top={100} left={700} visibility={projectsVisible} />
 		<Window width={400} height={300} top={60} left={230} visibility={experienceVisible} />
 		<Window width={300} height={100} top={700} left={1000} visibility={resumeVisible} />
 		<Window width={500} height={100} top={600} left={400} visibility={contactVisible} />
@@ -58,6 +58,13 @@
 		height: 100vh;
 		background-color: var(--primary);
 
+	}
+	:global(.buffer){ 
+		// This is used by elements using the window class, it gives no space at the bottom
+		// so each of them have a div.buffer that takes in this css to give them a 1rem padding
+		// TODO: improve this hacky solution.
+        padding-top: 1rem;
+        width: inherit;    
 	}
 
 	.prevent-select {
