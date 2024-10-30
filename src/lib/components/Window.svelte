@@ -67,6 +67,9 @@
 	};
 </script>
 
+<svelte:head>
+	<link rel="preload" as="image" href="{background}">
+</svelte:head>
 <div
 	class="window_container"
 	style="

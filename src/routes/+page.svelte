@@ -21,6 +21,11 @@
 	onMount(() => setTimeout(() => (visible = true), 10));
 </script>
 
+<svelte:head>
+	<link rel="preload" as="image" href="{background}">
+	<link rel="preload" as="image" href="{profilePic}">
+</svelte:head>
+
 <main style="--bg: url('{background}') ;">
 	{#if visible}
 		<!-- svelte-ignore a11y_missing_attribute -->
