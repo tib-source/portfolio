@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Writable } from "svelte/store";
+    import background from "$lib/assets/swirls.png"
 	import Window from "../components/Window.svelte";
 	let {
 		width,
@@ -9,7 +10,7 @@
         visibility,
 	}: { width: Number; height: Number; top?: Number; left?: Number; visibility: Writable<boolean>} = $props();
 </script>
-<Window {width} {height} {top} {left} {visibility} background={"/src/lib/assets/swirls.png"} >
+<Window {width} {height} {top} {left} {visibility} {background} >
 
 <div class="container">
     <h1>Projects</h1>
