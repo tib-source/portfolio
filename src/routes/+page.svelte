@@ -9,6 +9,7 @@
 	import Window from '$lib/components/Window.svelte';
 	import { projectsVisible, contactVisible, resumeVisible, experienceVisible} from '$lib/store';
 	import Projects from '$lib/windows/Projects.svelte';
+	import Resume from '$lib/windows/Resume.svelte';
 
 	let visible = $state(false);
     
@@ -33,8 +34,8 @@
 			<img transition:fade class="me prevent-select" src={profilePic} alt="Me basking in the sun" />
 		</div>
 		<Projects width={700} height={500} top={100} left={700} visibility={projectsVisible} />
+		<Resume width={700} height={500} top={100} left={100} visibility={resumeVisible} />
 		<Window width={400} height={300} top={60} left={230} visibility={experienceVisible} />
-		<Window width={300} height={100} top={700} left={1000} visibility={resumeVisible} />
 		<Window width={500} height={100} top={600} left={400} visibility={contactVisible} />
 		<Shelf />
 	{/if}
