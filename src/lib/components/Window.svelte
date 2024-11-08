@@ -111,7 +111,9 @@
 		border-radius: 0 0 var(--radius) var(--radius);
 		border: 1px solid rgba(255, 255, 255, 0.216);
 		box-shadow: 0 0 1rem rgba(0, 0, 0, 0.193);
-		background-image: var(--background-window);
+		background: color-mix(in srgb, var(--primary) 10%, transparent) ;
+		backdrop-filter: blur(100px) contrast(150%);
+
 	}
 	.window {
 		overflow-y: auto;
@@ -119,6 +121,7 @@
 		height: 100%;
 		scrollbar-color: var(--secondary) transparent;
 		scrollbar-width: thin;
+
 	}
 
 	.helmet {

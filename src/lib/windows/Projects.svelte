@@ -2,6 +2,11 @@
 	import type { Writable } from "svelte/store";
     import background from "$lib/assets/swirls.png"
 	import Window from "../components/Window.svelte";
+	import Project from "$lib/components/Project.svelte";
+	import lumin from "$lib/assets/projects/lumin.png";
+	import grim from "$lib/assets/projects/grim_repoer.png";
+	import ergon from "$lib/assets/projects/ergon.png";
+	import portfolio from "$lib/assets/background.jpeg";
 	let {
 		width,
 		height ,
@@ -16,14 +21,13 @@
     <h1>Projects</h1>
     <hr>
     <div class="project_list">
-        <div class="item"></div>
-        <div class="item"></div>
-        <div class="item"></div>
-        <div class="item"></div>
-        <div class="item"></div>
-        <div class="item"></div>
-        <div class="item"></div>
-        <div class="item"></div>
+        <Project name="Grim Repoer" description="An amazing project" thumbnail={grim} />
+        <Project name="Ergon" description="An amazing project" thumbnail={ergon} />
+        <Project name="${"{this}"}" description="An amazing project" thumbnail={portfolio} />
+        <Project name="Lumin" description="An amazing project" thumbnail={lumin} />
+        <Project name="${"{this}"}" description="An amazing project" thumbnail={portfolio} />
+        <Project name="${"{this}"}" description="An amazing project" thumbnail={portfolio} />
+
     </div>
     <div class="buffer"></div>
 
