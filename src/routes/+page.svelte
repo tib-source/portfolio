@@ -10,6 +10,8 @@
 	import { projectsVisible, contactVisible, resumeVisible, experienceVisible} from '$lib/store';
 	import Projects from '$lib/windows/Projects.svelte';
 	import Resume from '$lib/windows/Resume.svelte';
+	import Contact from '$lib/windows/Contact.svelte';
+	import Experience from '$lib/windows/Experience.svelte';
 
 	let visible = $state(false);
     
@@ -40,8 +42,8 @@
 		</div>
 		<Projects width={700} height={500} top={100} left={700} visibility={projectsVisible} />
 		<Resume width={700} height={500} top={100} left={100} visibility={resumeVisible} />
-		<Window width={400} height={300} top={60} left={230} visibility={experienceVisible} />
-		<Window width={500} height={100} top={600} left={400} visibility={contactVisible} />
+		<Experience width={400} height={300} top={60} left={230} visibility={experienceVisible} />
+		<Contact width={500} height={100} top={600} left={400} visibility={contactVisible} />
 		<Shelf />
 	{/if}
 </main>

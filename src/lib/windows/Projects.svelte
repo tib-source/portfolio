@@ -67,21 +67,5 @@
         margin-bottom: 1rem;
     }
 
-    .item{
-        width: 100%;
-        aspect-ratio: 1;
-        margin: auto;
-		background: color-mix(in srgb, var(--primary) 20%, transparent);
-		backdrop-filter: blur(20px);
-		box-shadow: 0 0 .1rem var(--secondary);
-        transition: 300ms;
-    }
-
-    .item:hover{ 
-        transform: scale(1.02);
-
-
-    }
-
 
 </style>

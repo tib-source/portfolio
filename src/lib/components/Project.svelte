@@ -17,14 +17,15 @@
 
 <style lang="scss">
     .project{ 
-        height: 300px;
+        height: 200px;
         border-radius: 1rem;
         overflow: hidden;
         cursor: pointer;
-        box-shadow: 0px 0px .1rem white;
-        backdrop-filter: drop-shadow(4px 4px 10px black);
+        background-color: rgba(0, 0, 0, 0.534);
         box-shadow: inset 0 0 1rem rgba(255, 255, 255, 0.088);
         box-shadow:  0 0 1rem rgba(255, 255, 255, 0.06);
+        transition: 200ms;
+        border: 1px solid var(--secondary);
     }
 
     .project:hover{ 
@@ -33,9 +34,10 @@
 
     img{ 
         width: 100%;
-        height: 50%;
+        height: 60%;
         object-fit: cover;
-        border-bottom: 1px solid var(--secondary);
+        image-rendering: optimizeSpeed;
+        // border-bottom: 1px solid var(--secondary);
     }
 
     .info{ 

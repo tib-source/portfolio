@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import { spring } from 'svelte/motion';
 	import type { Writable } from 'svelte/store';
@@ -8,8 +9,10 @@
 		src,
 		name,
 		bounce,
-		visibility
-	}: { src: string; name: string; bounce?: boolean; visibility: Writable<boolean> } = $props();
+		visibility,
+		full,
+		link
+	}: { src: string; name: string; bounce?: boolean; visibility?: Writable<boolean>; full?: boolean; link?: string } = $props();
 
 	let isBouncing = $state(false);
 	let toolTipVisible = $state(false);
@@ -33,16 +36,20 @@
 	};
 
 	const handleOpenWindow = () => {
-        isBouncing = false
-		if ($visibility) {
-			visibility.set(false);
-		} else {
-			visibility.set(true);
+		if(visibility){
+				isBouncing = false
+			if ($visibility) {
+				visibility.set(false);
+			} else {
+				visibility.set(true);
+			}
+		}else { 
+			window.open(link, '_blank').focus();
 		}
 	};
 </script>
 
-<div class="icon">
+<div class="icon {isBouncing ? 'bouncing' : ''}" >
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<img
@@ -50,7 +57,6 @@
 		onfocus={handleHover}
 		onmouseleave={() => (toolTipVisible = false)}
 		onclick={handleOpenWindow}
-		class={isBouncing ? 'bouncing' : ''}
 		{src}
 		alt="{name} icon"
 	/>
@@ -65,20 +71,22 @@
 		--color: black;
 	}
 	.icon {
+		height: fit-content;
+		width: fit-content;
 		position: relative;
-		width: 50px;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
+		border-radius: 1rem;
+		overflow: hidden;
 	}
 
 	img {
-		background-color: var(--secondary);
-		padding: 0.5rem;
-		border-radius: 1rem;
-		object-fit: cover;
 		width: 50px;
+		background-color: var(--secondary);
+		padding: 0.4rem;
+		object-fit: contain;
 		transition: 300ms;
 		cursor: pointer;
 	}

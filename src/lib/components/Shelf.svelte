@@ -4,7 +4,8 @@
 	import projectIcon from '$lib/assets/icons/project.png';
 	import resumeIcon from '$lib/assets/icons/cv.png';
 	import experienceIcon from '$lib/assets/icons/experience.png';
-	import contactIcon from '$lib/assets/icons/contact.png';
+	import github from '$lib/assets/icons/github.svg';
+	import linkedin from '$lib/assets/icons/linkedin.svg';
 	import { projectsVisible, contactVisible, resumeVisible, experienceVisible} from '$lib/store';
     interface Context {
         contactVisible: boolean;
@@ -29,17 +30,24 @@
 			visibility={experienceVisible}
 		/>
 		<Icon
-			src={contactIcon}
-			name="Contact"
-			visibility={contactVisible}
-		/>
-		<hr />
-		<Icon
 			src={resumeIcon}
 			name="Resume"
             visibility={resumeVisible}
 
 
+		/>
+		<hr />
+		<Icon
+		src={github}
+		name="GitHub"
+		full
+		link="https://github.com/tib-source"
+		/>
+		<Icon
+			src={linkedin}
+			name="LinkedIn"
+			full
+			link="https://www.linkedin.com/in/tibebe-d-41b421216/"
 		/>
 	</div>
 </section>
@@ -50,11 +58,11 @@
 		bottom: 1rem;
 	}
 	.shelf {
-		padding: 2.3rem 1rem;
 		display: flex;
-		justify-content: space-between;
-		width: 18rem;
-		height: 4rem;
+		justify-content: space-evenly;
+		align-items: center;
+		width: 20rem;
+		height: 4.5rem;
 		background-color: var(--primary);
 		box-shadow:
 			0 0 0.15rem rgba(255, 255, 255, 0.354),
