@@ -84,8 +84,7 @@
 
 	img {
 		width: 50px;
-		box-shadow: 0 0 .2rem var(--secondary);
-		background-color: white;
+		background-color: var(--secondary);
 		padding: 0.4rem;
 		object-fit: contain;
 		transition: 300ms;
@@ -97,6 +96,7 @@
 	img:hover {
 		background-color: rgba(255, 255, 255, 0.519);
 	}
+	
 	.tooltip {
 		position: absolute;
 		top: -2.5rem;
