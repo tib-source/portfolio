@@ -23,7 +23,8 @@
 			src={projectIcon}
 			name="Projects"
 			bounce={true}
-			visibility={projectsVisible}		/>
+			visibility={projectsVisible}
+		/>
 		<Icon
 			src={experienceIcon}
 			name="Experience"
@@ -33,20 +34,16 @@
 			src={resumeIcon}
 			name="Resume"
             visibility={resumeVisible}
-
-
 		/>
 		<hr />
 		<Icon
 		src={github}
 		name="GitHub"
-		full
 		link="https://github.com/tib-source"
 		/>
 		<Icon
 			src={linkedin}
 			name="LinkedIn"
-			full
 			link="https://www.linkedin.com/in/tibebe-d-41b421216/"
 		/>
 	</div>

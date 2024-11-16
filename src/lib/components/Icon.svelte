@@ -10,9 +10,8 @@
 		name,
 		bounce,
 		visibility,
-		full,
 		link
-	}: { src: string; name: string; bounce?: boolean; visibility?: Writable<boolean>; full?: boolean; link?: string } = $props();
+	}: { src: string; name: string; bounce?: boolean; visibility?: Writable<boolean>; link?: string } = $props();
 
 	let isBouncing = $state(false);
 	let toolTipVisible = $state(false);
@@ -43,8 +42,10 @@
 			} else {
 				visibility.set(true);
 			}
-		}else { 
-			window.open(link, '_blank').focus();
+		}else {
+			if(browser){
+				window.open(link, '_blank');
+			}
 		}
 	};
 </script>
@@ -79,24 +80,26 @@
 		justify-content: center;
 		align-items: center;
 		border-radius: 1rem;
-		overflow: hidden;
 	}
 
 	img {
 		width: 50px;
-		background-color: var(--secondary);
+		box-shadow: 0 0 .2rem var(--secondary);
+		background-color: white;
 		padding: 0.4rem;
 		object-fit: contain;
 		transition: 300ms;
 		cursor: pointer;
+		border-radius: 1rem;
+
 	}
 
 	img:hover {
 		background-color: rgba(255, 255, 255, 0.519);
 	}
-	p {
+	.tooltip {
 		position: absolute;
-		top: -4.5rem;
+		top: -2.5rem;
 		background-color: var(--tooltip);
 		border-radius: 1rem;
 		padding: 0.5rem;
@@ -104,10 +107,10 @@
 		font-weight: 100;
 		letter-spacing: 0.05rem;
 		color: var(--color);
-		opacity: 50%;
+		opacity: 7 5%;
 	}
 
-	p::after {
+	.tooltip::after {
 		content: ' ';
 		position: absolute;
 		top: 100%; /* At the bottom of the tooltip */
