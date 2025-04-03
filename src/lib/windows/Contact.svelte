@@ -2,8 +2,8 @@
 	import type { Writable } from "svelte/store";
 	import Window from "../components/Window.svelte";
     import github from "$lib/assets/icons/github.svg"
-    import linkedin from "$lib/assets/icons/linkedin.svg"
-    import email from "$lib/assets/icons/email.svg"
+    import linkedin from "$lib/assets/icons/profile.svg"
+    import email from "$lib/assets/icons/home.svg"
 	let {
 		width,
 		height ,

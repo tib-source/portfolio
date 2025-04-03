@@ -59,6 +59,7 @@
 		color: white;
 		--primary: #280d1e;
 		--secondary: #fdbfa3;
+		--secondary-light: #f7e1d7;
 	}
 
 	:global(body) {

@@ -1,11 +1,11 @@
 <script lang="ts" >
 	import { fly } from 'svelte/transition';
 	import Icon from './Icon.svelte';
-	import projectIcon from '$lib/assets/icons/project.png';
-	import resumeIcon from '$lib/assets/icons/cv.png';
-	import experienceIcon from '$lib/assets/icons/experience.png';
+	import homeIcon from '$lib/assets/icons/home.svg';
+	import resumeIcon from '$lib/assets/icons/profile.svg';
+	import experienceIcon from '$lib/assets/icons/folder.svg';
 	import github from '$lib/assets/icons/github.svg';
-	import linkedin from '$lib/assets/icons/linkedin.svg';
+	import linkedin from '$lib/assets/icons/profile.svg';
 	import { projectsVisible, contactVisible, resumeVisible, experienceVisible} from '$lib/store';
     interface Context {
         contactVisible: boolean;
@@ -20,7 +20,7 @@
 <section class="container" in:fly={{ y: 100, duration: 1000 }}>
 	<div class="shelf">
 		<Icon
-			src={projectIcon}
+			src={homeIcon}
 			name="Projects"
 			bounce={true}
 			visibility={projectsVisible}
@@ -59,12 +59,11 @@
 		justify-content: space-evenly;
 		align-items: center;
 		width: 20rem;
-		height: 4.5rem;
-		background-color: var(--primary);
-		box-shadow:
-			0 0 0.15rem rgba(255, 255, 255, 0.354),
-			0 0 1rem rgba(255, 255, 255, 0.134);
-		border-radius: 0.7rem;
-		background-color: color-mix(in srgb, var(--primary) 80%, transparent);
+		padding: .3rem;
+		border: 1px solid color-mix(in srgb, var(--secondary) 30%, transparent);
+		border-radius: 3rem;
+		background-color: color-mix(in srgb, var(--secondary) 20%, transparent);
+			backdrop-filter: blur(1rem);
+
 	}
 </style>
