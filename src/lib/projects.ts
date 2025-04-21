@@ -38,7 +38,7 @@ const projects: project[] = [
 			'A website for a local restaurant. It includes a menu, contact form, and a gallery.',
 		tech: ['NextJs', 'Netlify CMS'],
 		link: 'http://flamingo-restaurant.netlify.app/',
-		source: 'https://github.com/tib-source/tib-source.github.io',
+		source: 'https://github.com/tib-source/flamingo',
 		image: flamingo
 	},
 	{
@@ -46,7 +46,7 @@ const projects: project[] = [
 		description: 'My personal portfolio website.',
 		tech: ['Svelte', 'TypeScript', 'Tailwind CSS'],
 		link: 'https://tibebe.co.uk/',
-		source: 'https://github.com/tib-source/tib-source.github.io',
+		source: 'https://github.com/tib-source/portfolio',
 		image: protfolio
 	},
 	{
