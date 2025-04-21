@@ -1,6 +1,8 @@
 import ergon from '$lib/assets/projects/ergon.png';
 import grim from '$lib/assets/projects/grim_repoer.png';
 import protfolio from '$lib/assets/background.jpeg';
+import flamingo from '$lib/assets/projects/flamingo.png';
+import calculator from '$lib/assets/projects/calculator.jpg';
 
 export interface project {
 	name: string;
@@ -30,7 +32,15 @@ const projects: project[] = [
 		source: 'https://github.com/tib-source/GrimRepoer',
 		image: grim
 	},
-
+	{
+		name: 'Flamingo Restaurant',
+		description:
+			'A website for a local restaurant. It includes a menu, contact form, and a gallery.',
+		tech: ['NextJs', 'Netlify CMS'],
+		link: 'http://flamingo-restaurant.netlify.app/',
+		source: 'https://github.com/tib-source/tib-source.github.io',
+		image: flamingo
+	},
 	{
 		name: '${this}',
 		description: 'My personal portfolio website.',
@@ -38,6 +48,14 @@ const projects: project[] = [
 		link: 'https://tibebe.co.uk/',
 		source: 'https://github.com/tib-source/tib-source.github.io',
 		image: protfolio
+	},
+	{
+		name: 'Calculator App',
+		description: 'A simple calculator app which I made while learning React.',
+		tech: ['React', 'Styled Components'],
+		link: 'https://tib-source.github.io/calculator-react/',
+		source: 'https://github.com/tib-source/calculator-react',
+		image: calculator
 	}
 ];
 
