@@ -37,7 +37,13 @@
 		--secondary: #fdbfa3;
 		--secondary-light: #f7e1d7;
 	}
+	:global(html) {
+		margin-left: calc(100vw - 100%);
+		margin-right: 0;
 
+		scrollbar-color: #fdbfa3 #39102a;
+		scrollbar-width: thin;
+	}
 	:global(body) {
 		background-color: var(--primary);
 	}
