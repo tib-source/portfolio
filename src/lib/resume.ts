@@ -12,7 +12,7 @@ export const resumeData = {
 		phone: '',
 		avatar: me
 	},
-	summary: `Hey 👋, I’m an Ethiopian currently in the UK as an international student and a software engineer who’s constantly tinkering with ideas that blend culture, creativity, and code. Right now, I’m at Matillion, working on everything from repo migrations to internal tooling. Before that, I was keeping VR systems alive (and customers happy) at Otherworld. Outside of work, I love building random projects — currently designing a website that celebrates Ethiopian food and culture, mixing recipes, history, and where to find real ingredients. When I’m not coding, you’ll find me learning Spanish, training Muay Thai, or diving into anime`,
+	summary: `Hey 👋, I’m an international student from Ethiopia. Right now, I’m at Matillion, working on everything from repo migrations, incident management to internal tooling. Before that, I was keeping VR systems alive (and customers happy) at Otherworld. Outside of work, I love building random projects — currently designing a website that celebrates Ethiopian food and culture, mixing recipes, history, and where to find real ingredients. When I’m not coding, you’ll find me learning Spanish, kicking pads at Muay Thai, or watching an obscure anime`,
 	experience: [
 		{
 			position: 'Software Engineer Placement - DevX',
