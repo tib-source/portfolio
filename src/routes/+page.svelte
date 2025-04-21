@@ -4,78 +4,43 @@
 	// import background from '$lib/assets/swirls.png';
 	// import background from '$lib/assets/bg.jpg';
 	import { fade, fly } from 'svelte/transition';
-	import { onMount } from 'svelte';
-	import Shelf from '$lib/components/Shelf.svelte';
-	import Window from '$lib/components/Window.svelte';
-	import { projectsVisible, contactVisible, resumeVisible, experienceVisible} from '$lib/store';
-	import Projects from '$lib/windows/Projects.svelte';
-	import Resume from '$lib/windows/Resume.svelte';
-	import Contact from '$lib/windows/Contact.svelte';
-	import Experience from '$lib/windows/Experience.svelte';
+	import { Button } from '$lib/components/ui/button';
 
 	let visible = $state(false);
-    
-    
+
 	const toggle: Function = (state: boolean, value: boolean) => {
 		state = value;
 	};
-
-	onMount(() => setTimeout(() => (visible = true), 10));
 </script>
 
 <svelte:head>
-	<link rel="preload" as="image" href="{background}">
-	<link rel="preload" as="image" href="{profilePic}">
+	<link rel="preload" as="image" href={background} />
+	<link rel="preload" as="image" href={profilePic} />
 </svelte:head>
 
-<main style="--bg: url('{background}') ;">
-	{#if visible}
-		<!-- svelte-ignore a11y_missing_attribute -->
-		<img src={background} class="background" />
-
-		<div class="intro">
-			<div in:fly={{ x: -100, duration: 1000 }} class="text">
-				<h1>HELL</h1>
-				<p>I'm <span>Tibebe</span>, A Software Dev based in London</p>
-			</div>
-			<img transition:fade class="me prevent-select" src={profilePic} alt="Me basking in the sun" />
+<main>
+	<div class="intro">
+		<div in:fly={{ x: -100, duration: 1000 }} class="text prevent-select">
+			<h1>HELL</h1>
+			<p>I'm <span>Tibebe</span>, welcome to my portfolio</p>
 		</div>
-		<Projects width={700} height={500} top={100} left={700} visibility={projectsVisible} />
-		<Resume width={700} height={500} top={100} left={100} visibility={resumeVisible} />
-		<Experience width={400} height={300} top={60} left={230} visibility={experienceVisible} />
-		<Contact width={500} height={100} top={600} left={400} visibility={contactVisible} />
-		<Shelf />
-	{/if}
+		<img transition:fade class="me prevent-select" src={profilePic} alt="Me basking in the sun" />
+	</div>
+	<!-- <div class="buttons" in:fade={{ delay: 100 }}>
+		<Button class="bg-[#e8d5c4] text-[#5a1e33] hover:bg-[#e8d5c4]/90 w-full sm:w-auto">My Projects</Button>
+		<Button class="bg-[#e8d5c4] text-[#5a1e33] hover:bg-[#e8d5c4]/90 w-full sm:w-auto">About me</Button>
+	</div> -->
 </main>
 
 <style lang="scss">
 	@import url('https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@100;300;400;900&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 
-	:global(*) {
-		margin: 0;
-		padding: 0;
-		box-sizing: border-box;
-		font-family: 'Londrina Solid', sans-serif;
-		color: white;
-		--primary: #280d1e;
-		--secondary: #fdbfa3;
-		--secondary-light: #f7e1d7;
-	}
-
-	:global(body) {
-		width: 100vw;
-		height: 100vh;
-		background-color: var(--primary);
-
-	}
-	:global(.buffer){ 
-		// This is used by elements using the window class, it gives no space at the bottom
-		// so each of them have a div.buffer that takes in this css to give them a 1rem padding
-		// TODO: improve this hacky solution.
-        padding-top: 1rem;
-        width: inherit;    
-	}
-
+	// .buttons{
+	// 	font-family: sans-serif;
+	// 	position: relative;
+	// 	left: -2rem;
+	// 	top:-1rem;
+	// }
 	.prevent-select {
 		-webkit-user-select: none; /* Safari */
 		-ms-user-select: none; /* IE 10 and IE 11 */
@@ -83,39 +48,19 @@
 	}
 
 	main {
-		position: relative;
-		width: 100%;
-		height: 100%;
-		overflow: hidden;
+		font-family: 'Londrina Solid', sans-serif;
 		display: flex;
+		flex-direction: column;
 		justify-content: center;
-		// background-color: var(--primary);
-        // background-image: var(--bg);
-        // background-size: cover;
-        // background-position: center;
-        // background-repeat: no-repeat;
-        // background-blend-mode: overlay;
-
-
-		.background {
-			position: absolute;
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
-			opacity: 0.4;
-			z-index: -9999;
-		}
+		align-items: center;
+		height: 80vh;
 
 		.intro {
-			pointer-events: none;
-			position: absolute;
-			top: 40%;
-			left: 50%;
-			transform: translate(-50%, -50%);
 			display: grid;
 			grid-template-columns: 1fr 1fr;
 			align-items: center;
 			color: white;
+
 			.me {
 				z-index: -100;
 				width: 300px;
@@ -139,8 +84,8 @@
 				P {
 					width: max-content;
 					position: absolute;
-					top: 12.5rem;
-					left: 4rem;
+					top: 14.75rem;
+					left: 5rem;
 					font-size: 1.5rem;
 					font-weight: 200;
 					letter-spacing: 1px;
