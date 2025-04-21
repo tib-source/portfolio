@@ -33,6 +33,8 @@
 				alt="Me basking in the sun"
 				width="300"
 				height="300"
+				loading="lazy"
+				decoding="async"
 				in:fade={{ duration: 300 }}
 			/>
 		{:else}
