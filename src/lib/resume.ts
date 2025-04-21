@@ -1,6 +1,4 @@
-import me from '$lib/assets/me.jpeg';
-import ergon from '$lib/assets/projects/ergon.png';
-import grim_repoer from '$lib/assets/projects/grim_repoer.png';
+import me from '$lib/assets/me.webp';
 import projects from './projects';
 
 export const resumeData = {

@@ -1,9 +1,5 @@
 <script lang="ts">
 	import Project from '$lib/components/Project.svelte';
-	import lumin from '$lib/assets/projects/lumin.png';
-	import grim from '$lib/assets/projects/grim_repoer.png';
-	import ergon from '$lib/assets/projects/ergon.png';
-	import portfolio from '$lib/assets/background.jpeg';
 
 	import projects from '$lib/projects';
 </script>

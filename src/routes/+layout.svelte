@@ -1,7 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import profilePic from '$lib/assets/me.jpeg';
-	import background from '$lib/assets/background.jpeg';
+	import background from '$lib/assets/background.webp';
 	import { onMount } from 'svelte';
 	import Shelf from '$lib/components/Shelf.svelte';
 	import { browser } from '$app/environment';

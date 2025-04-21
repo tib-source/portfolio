@@ -1,5 +1,5 @@
 <script lang="ts">
-	import profilePic from '$lib/assets/me.jpeg';
+	import profilePic from '$lib/assets/me.webp';
 	import { fade, fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
 
