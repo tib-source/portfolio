@@ -17,9 +17,11 @@
 >
 	<div class="relative h-48 overflow-hidden">
 		<img
-			src={thumbnail || '/placeholder.svg'}
+			src={thumbnail}
 			alt={name}
 			class="object-contain transition-transform duration-500 group-hover:scale-110"
+			loading="lazy"
+			decoding="async"
 		/>
 		<div class="absolute inset-0 bg-gradient-to-t from-[#2e0f1a]/80 to-transparent"></div>
 	</div>

@@ -4,36 +4,68 @@
 	import background from '$lib/assets/background.jpeg';
 	import { onMount } from 'svelte';
 	import Shelf from '$lib/components/Shelf.svelte';
+	import { browser } from '$app/environment';
 
 	let visible = $state(false);
+	let bgLoaded = $state(false);
 
-	const toggle: Function = (state: boolean, value: boolean) => {
-		state = value;
-	};
+	onMount(() => {
+		// Defer non-critical operations
+		visible = true;
 
-	onMount(() => setTimeout(() => (visible = true), 0));
+		// Load background image after initial content is displayed
+	});
+
+	if (browser) {
+		const img = new Image();
+		img.src = background;
+		img.onload = () => {
+			bgLoaded = true;
+		};
+	}
 
 	let { children } = $props();
 </script>
 
 <svelte:head>
-	<link rel="preload" as="image" href={background} />
-	<link rel="preload" as="image" href={profilePic} />
+	<!-- Preload only critical CSS first -->
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" />
+	<!-- <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"> -->
+	<noscript
+		><link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap"
+		/></noscript
+	>
+	<link
+		rel="stylesheet"
+		href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@100;300;400;900&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
+	/>
+
+	<!-- Add metadata for better SEO and page load metrics -->
+	<meta name="description" content="Tibebe Demissie's Portfolio - Software Engineer" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </svelte:head>
 
 <main>
 	{#if visible}
-		<!-- svelte-ignore a11y_missing_attribute -->
-		<img src={background} class="background" />
+		{#if bgLoaded}
+			<img src={background} class="background" alt="" fetchpriority="low" />
+		{:else}
+			<div class="background-placeholder"></div>
+		{/if}
+
 		{@render children()}
 		<Shelf />
 	{/if}
 </main>
 
 <style lang="scss">
-	@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-	@import url('https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@100;300;400;900&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+	/* Load critical fonts first */
+	@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
+	/* Other fonts can be loaded lazily */
 	:global(*) {
 		color: white;
 		--primary: #280d1e;
@@ -51,21 +83,26 @@
 		font-family: 'Poppins', sans-serif;
 	}
 	:global(.buffer) {
-		// This is used by elements using the window class, it gives no space at the bottom
-		// so each of them have a div.buffer that takes in this css to give them a 1rem padding
-		// TODO: improve this hacky solution.
 		padding-top: 1rem;
 		width: inherit;
 	}
 
-	.background {
-		position: absolute;
+	.background,
+	.background-placeholder {
+		position: fixed;
 		width: 100vw;
 		height: 100vh;
 		object-fit: cover;
 		opacity: 0.4;
 		z-index: -9999;
-		position: fixed;
+	}
+
+	.background-placeholder {
+		background-color: var(--primary);
+	}
+
+	.background {
+		will-change: transform; /* Optimize for GPU acceleration */
 	}
 
 	main {

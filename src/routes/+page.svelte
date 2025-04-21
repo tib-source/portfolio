@@ -1,50 +1,72 @@
 <script lang="ts">
 	import profilePic from '$lib/assets/me.jpeg';
 	import { fade, fly } from 'svelte/transition';
+	import { onMount } from 'svelte';
+
+	let imageLoaded = false;
+
+	onMount(() => {
+		// Preload the profile image
+		if (document.readyState === 'complete') {
+			imageLoaded = true;
+		} else {
+			window.addEventListener('load', () => {
+				imageLoaded = true;
+			});
+		}
+	});
 </script>
 
 <main>
 	<div class="intro">
-		<div in:fly={{ x: -100, duration: 1000 }} class="text prevent-select">
-			<h1>HELL</h1>
-			<p>I'm <span>Tibebe</span>, welcome to my portfolio</p>
+		<div class="text prevent-select">
+			<h1 in:fly={{ x: -100, duration: 500, delay: 100 }}>HELL</h1>
+			<p in:fly={{ x: -100, duration: 500, delay: 0 }}>
+				I'm <span>Tibebe</span>, welcome to my portfolio
+			</p>
 		</div>
-		<img transition:fade class="me prevent-select" src={profilePic} alt="Me basking in the sun" />
+
+		{#if imageLoaded}
+			<img
+				class="me prevent-select"
+				src={profilePic}
+				alt="Me basking in the sun"
+				width="300"
+				height="300"
+				in:fade={{ duration: 300 }}
+			/>
+		{:else}
+			<div class="me-placeholder prevent-select"></div>
+		{/if}
 	</div>
-	<!-- <div class="buttons" in:fade={{ delay: 100 }}>
-		<Button class="bg-[#e8d5c4] text-[#5a1e33] hover:bg-[#e8d5c4]/90 w-full sm:w-auto">My Projects</Button>
-		<Button class="bg-[#e8d5c4] text-[#5a1e33] hover:bg-[#e8d5c4]/90 w-full sm:w-auto">About me</Button>
-	</div> -->
 </main>
 
 <style lang="scss">
-	// .buttons{
-	// 	font-family: sans-serif;
-	// 	position: relative;
-	// 	left: -2rem;
-	// 	top:-1rem;
-	// }
 	.prevent-select {
-		-webkit-user-select: none; /* Safari */
-		-ms-user-select: none; /* IE 10 and IE 11 */
-		user-select: none; /* Standard syntax */
+		-webkit-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
 	}
 
 	main {
+		width: 100%;
 		font-family: 'Londrina Solid', sans-serif;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
 		height: 80vh;
+		contain: content;
 
 		.intro {
 			display: grid;
 			grid-template-columns: 1fr 1fr;
 			align-items: center;
 			color: white;
+			will-change: transform;
 
-			.me {
+			.me,
+			.me-placeholder {
 				z-index: -100;
 				width: 300px;
 				aspect-ratio: 1 / 1;
@@ -53,6 +75,11 @@
 					0.75rem 0 var(--secondary),
 					0rem 0 10rem color-mix(in srgb, var(--secondary) 30%, transparent);
 				border: 0.25rem solid white;
+			}
+
+			.me-placeholder {
+				background-color: var(--primary);
+				opacity: 0.6;
 			}
 
 			.text {
@@ -67,7 +94,7 @@
 				P {
 					width: max-content;
 					position: absolute;
-					top: 14.75rem;
+					top: 15rem;
 					left: 5rem;
 					font-size: 1.5rem;
 					font-weight: 200;
@@ -89,7 +116,8 @@
 			.intro {
 				display: flex;
 
-				.me {
+				.me,
+				.me-placeholder {
 					position: relative;
 					width: 150px;
 					top: -2rem;
