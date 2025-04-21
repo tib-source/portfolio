@@ -65,9 +65,7 @@
 
 		<div class="ml-auto hidden md:block">
 			<a href={resumeDocument} download>
-				<Button class="bg-[#e8d5c4] text-[#5a1e33] hover:bg-[#e8d5c4]/90">
-					Download Resume
-				</Button>
+				<Button class="bg-[#e8d5c4] text-[#5a1e33] hover:bg-[#e8d5c4]/90">Download Resume</Button>
 			</a>
 		</div>
 	</div>
