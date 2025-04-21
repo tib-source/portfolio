@@ -12,33 +12,27 @@ export const resumeData = {
 		phone: '',
 		avatar: me
 	},
-	summary: `Creative developer with 8+ years of experience in web development, game design, and interactive media.
-          Passionate about creating immersive digital experiences that blend creativity with technical precision.
-          Proven track record of delivering high-quality projects for startups, agencies, and established companies.
-          Skilled in front-end development, UI/UX design, and game development with a focus on user experience and
-          performance.`,
+	summary: `Hey 👋, I’m an Ethiopian currently in the UK as an international student and a software engineer who’s constantly tinkering with ideas that blend culture, creativity, and code. Right now, I’m at Matillion, working on everything from repo migrations to internal tooling. Before that, I was keeping VR systems alive (and customers happy) at Otherworld. Outside of work, I love building random projects — currently designing a website that celebrates Ethiopian food and culture, mixing recipes, history, and where to find real ingredients. When I’m not coding, you’ll find me learning Spanish, training Muay Thai, or diving into anime`,
 	experience: [
 		{
 			position: 'Software Engineer Placement - DevX',
 			company: 'Matillion, Manchester',
 			period: 'July 2024 - Present',
 			achievements: [
-				'Lead developer for 5+ web applications and 2 game projects',
-				'Implemented responsive design systems that improved mobile user engagement by 40%',
-				'Mentored junior developers and conducted code reviews to ensure quality standards',
-				'Optimized application performance, reducing load times by 35%'
+				"Developed and maintained an internal tool used to migrate over 700 repositories",
+				"Designed a Jfrog artifact cleaner to reduce storage costs and sped up ArgoCD deployments",
+				"Worked with MIT interns to create an internal copilot trained on documentation for employees",
 			],
-			skills: ['React', 'Next.js', 'TypeScript', 'Unity']
+			skills: ['Kubernetes', 'ArgoCD', 'Python', 'Terraform', 'Docker']
 		},
 		{
 			position: 'IT Support Engineer',
 			company: 'The Dream Corporation(Otherworld VR), London',
 			period: '2017 - 2020',
 			achievements: [
-				'Designed and developed user interfaces for 10+ client websites and applications',
-				'Created interactive prototypes that improved client approval rates by 60%',
-				'Collaborated with UX researchers to implement data-driven design improvements',
-				'Developed component libraries that reduced development time by 25%'
+				"Managed urgent escalations from 1st Line Experience Guides and Floor Team Members",
+				"Monitored the uptime and performance of on-premises and cloud systems",
+				"Communicated with guests directly via VoIP to provide calm and reassuring technical support"
 			],
 			skills: ['JavaScript', 'React', 'Figma', 'CSS/SASS']
 		}

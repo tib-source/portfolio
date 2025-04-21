@@ -19,25 +19,12 @@
 		class="overflow-hidden rounded-xl border border-[#e8d5c4]/30 bg-[#e8d5c4]/10 backdrop-blur-md"
 		in:fly={{ y: -5, duration: 200 }}
 	>
-		<!-- Profile Section -->
 		<ProfileSection profile={resumeData.profile} />
-
-		<!-- Summary Section -->
 		<SummarySection summary={resumeData.summary} />
-
-		<!-- Experience Section -->
 		<ExperienceSection experience={resumeData.experience} />
-
-		<!-- Education Section -->
 		<EducationSection education={resumeData.education} />
-
-		<!-- Skills Section -->
 		<SkillsSection skills={resumeData.skills} />
-
-		<!-- Certifications Section -->
-		<CertificationsSection certifications={resumeData.certifications} />
-
-		<!-- Projects Section -->
+		<!-- <CertificationsSection certifications={resumeData.certifications} /> -->
 		<ProjectsSection projects={resumeData.featuredProjects} />
 	</div>
 

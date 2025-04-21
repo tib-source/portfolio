@@ -31,7 +31,7 @@
 					<span>{profile.location}</span>
 				</div>
 				<div class="flex items-center text-[#e8d5c4]/70">
-					<span>{profile.email}</span>
+					<a href={`mailto:${profile.email}`}>{profile.email}</a>
 				</div>
 				<div class="flex items-center text-[#e8d5c4]/70">
 					<span>{profile.phone}</span>

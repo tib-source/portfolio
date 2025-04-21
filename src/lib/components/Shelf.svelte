@@ -38,7 +38,7 @@
 		display: flex;
 		justify-content: center;
 		position: fixed;
-		bottom: 1rem;
+		bottom: 1.5rem;
 	}
 	.shelf {
 		display: flex;
@@ -49,7 +49,7 @@
 		border-radius: 3rem;
 		border: 1px solid color-mix(in srgb, var(--secondary) 30%, transparent);
 		background-color: color-mix(in srgb, var(--secondary) 20%, transparent);
-		backdrop-filter: blur(5rem);
+		backdrop-filter: blur(5rem) brightness(0.7);
 	}
 	hr {
 		width: 1px;

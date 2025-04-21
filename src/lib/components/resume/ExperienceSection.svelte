@@ -2,6 +2,7 @@
 	import { fade } from 'svelte/transition';
 	import code from '$lib/assets/icons/code.svg';
 	import { Badge } from '$lib/components/ui/badge';
+	import Title from './Title.svelte';
 
 	export let experience: Array<{
 		position: string;
@@ -13,10 +14,8 @@
 </script>
 
 <div class="border-b border-[#e8d5c4]/10 p-8" in:fade={{ delay: 100 }}>
-	<h3 class="mb-6 flex items-center text-xl font-bold">
-		<span class="mr-2 inline-block h-2 w-2 rounded-full bg-[#e8d5c4]"></span>
-		Work Experience
-	</h3>
+	<Title title="Work Experience"/>
+
 
 	{#each experience as job, i}
 		<div class="mb-8 {i === experience.length - 1 ? '' : 'mb-8'}" in:fade={{ delay: 150 + i * 50 }}>

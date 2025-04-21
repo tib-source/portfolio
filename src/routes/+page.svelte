@@ -1,22 +1,7 @@
 <script lang="ts">
 	import profilePic from '$lib/assets/me.jpeg';
-	import background from '$lib/assets/background.jpeg';
-	// import background from '$lib/assets/swirls.png';
-	// import background from '$lib/assets/bg.jpg';
 	import { fade, fly } from 'svelte/transition';
-	import { Button } from '$lib/components/ui/button';
-
-	let visible = $state(false);
-
-	const toggle: Function = (state: boolean, value: boolean) => {
-		state = value;
-	};
 </script>
-
-<svelte:head>
-	<link rel="preload" as="image" href={background} />
-	<link rel="preload" as="image" href={profilePic} />
-</svelte:head>
 
 <main>
 	<div class="intro">
@@ -33,7 +18,6 @@
 </main>
 
 <style lang="scss">
-	@import url('https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@100;300;400;900&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 
 	// .buttons{
 	// 	font-family: sans-serif;

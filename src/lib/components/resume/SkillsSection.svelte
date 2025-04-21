@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { Badge } from '$lib/components/ui/badge';
+	import Title from './Title.svelte';
 
 	export let skills: Array<{
 		category: string;
@@ -9,10 +10,8 @@
 </script>
 
 <div class="border-b border-[#e8d5c4]/10 p-8" in:fade={{ delay: 450 }}>
-	<h3 class="mb-6 flex items-center text-xl font-bold">
-		<span class="mr-2 inline-block h-2 w-2 rounded-full bg-[#e8d5c4]"></span>
-		Skills
-	</h3>
+	<Title title={"Skills"}/>
+
 
 	<div class="grid grid-cols-1 gap-x-12 gap-y-6 md:grid-cols-2">
 		{#each skills as skillGroup, i}

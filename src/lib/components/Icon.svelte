@@ -62,7 +62,7 @@
 		width: 30px;
 		aspect-ratio: 1;
 		object-fit: contain;
-		padding: 0.2rem;
+		padding: 2px;
 		opacity: 0.8;
 		transition: 10ms;
 	}
