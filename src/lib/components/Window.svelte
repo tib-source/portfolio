@@ -9,13 +9,13 @@
 		left = 0,
 		visibility,
 		background,
-		children,
+		children
 	}: {
 		width: Number;
 		height: Number;
 		top?: Number;
 		left?: Number;
-		background? : string;
+		background?: string;
 		children?: Snippet;
 		visibility: Writable<boolean>;
 	} = $props();
@@ -68,7 +68,7 @@
 </script>
 
 <svelte:head>
-	<link rel="preload" as="image" href="{background}">
+	<link rel="preload" as="image" href={background} />
 </svelte:head>
 <div
 	class="window_container"
@@ -94,7 +94,6 @@
 			{@render children()}
 		{/if}
 	</div>
-
 </div>
 
 <style>
@@ -111,9 +110,8 @@
 		border-radius: 0 0 var(--radius) var(--radius);
 		border: 1px solid rgba(255, 255, 255, 0.216);
 		box-shadow: 0 0 1rem rgba(0, 0, 0, 0.193);
-		background: color-mix(in srgb, var(--primary) 10%, transparent) ;
+		background: color-mix(in srgb, var(--primary) 10%, transparent);
 		backdrop-filter: blur(100px) contrast(150%);
-
 	}
 	.window {
 		overflow-y: auto;
@@ -121,7 +119,6 @@
 		height: 100%;
 		scrollbar-color: var(--secondary) transparent;
 		scrollbar-width: thin;
-
 	}
 
 	.helmet {
