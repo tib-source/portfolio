@@ -77,7 +77,7 @@
 				width: 400px;
 				h1 {
 					letter-spacing: 1rem;
-					font-size: 200px;
+					font-size: 13rem;
 					text-shadow: 0 0 10px rgba(255, 255, 255, 0.435);
 				}
 
@@ -99,5 +99,37 @@
 				}
 			}
 		}
+	}
+
+
+	@media (max-width: 768px) {
+		main{
+
+			.intro {
+			display: flex;
+			
+			.me{
+				position: relative;
+				width: 150px;
+				top: -2rem;
+				left: 3rem;
+				aspect-ratio: 1 / 1;
+			}
+			.text {
+				width: 80px;
+				h1 {
+					font-size: 5rem;
+					letter-spacing: 0.5rem;
+					text-shadow: 0 0 10px rgba(255, 255, 255, 0.435);
+				}
+				P {
+					top: 6rem;
+					left: 1rem;
+					font-size: 1rem;
+				}
+			}
+		}
+		}
+		
 	}
 </style>
