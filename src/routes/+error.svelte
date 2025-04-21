@@ -1,7 +1,6 @@
 
 <main
-class="w-full h-full flex justify-center items-center"
->
+class="container">
     <div class="p-4 flex flex-col gap-3 rounded-xl border border-[#e8d5c4]/30 bg-[#e8d5c4]/10 backdrop-blur-md">
         <h1 class="text-xl">404 - Page Not Found</h1>
         <p>Sorry, the page you are looking for does not exist.</p>
@@ -10,3 +9,14 @@ class="w-full h-full flex justify-center items-center"
         </p>
     </div>
 </main>
+
+<style>
+    /* i couldnt figure out how to do this in tainwind haha, just the height 100vh wouldnt work */
+    .container { 
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>

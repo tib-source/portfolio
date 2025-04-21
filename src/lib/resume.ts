@@ -28,13 +28,13 @@ export const resumeData = {
 		{
 			position: 'IT Support Engineer',
 			company: 'The Dream Corporation(Otherworld VR), London',
-			period: '2017 - 2020',
+			period: 'October 2023 - July 2024',
 			achievements: [
 				"Managed urgent escalations from 1st Line Experience Guides and Floor Team Members",
 				"Monitored the uptime and performance of on-premises and cloud systems",
 				"Communicated with guests directly via VoIP to provide calm and reassuring technical support"
 			],
-			skills: ['JavaScript', 'React', 'Figma', 'CSS/SASS']
+			skills: ['Ansible', 'Python', 'Networking', 'Windows']
 		}
 	],
 	education: [
