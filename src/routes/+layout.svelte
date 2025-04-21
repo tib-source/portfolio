@@ -10,10 +10,9 @@
 	let bgLoaded = $state(false);
 
 	onMount(() => {
-		// Defer non-critical operations
-		visible = true;
-
-		// Load background image after initial content is displayed
+		setTimeout(() => {
+			visible = true;
+		}, 100);
 	});
 
 	if (browser) {
@@ -32,12 +31,10 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" />
 	<!-- <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"> -->
-	<noscript
-		><link
-			rel="stylesheet"
-			href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap"
-		/></noscript
-	>
+	<link
+		rel="stylesheet"
+		href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap"
+	/>
 	<link
 		rel="stylesheet"
 		href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@100;300;400;900&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
