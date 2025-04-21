@@ -10,8 +10,7 @@
 </script>
 
 <div class="border-b border-[#e8d5c4]/10 p-8" in:fade={{ delay: 450 }}>
-	<Title title={"Skills"}/>
-
+	<Title title={'Skills'} />
 
 	<div class="grid grid-cols-1 gap-x-12 gap-y-6 md:grid-cols-2">
 		{#each skills as skillGroup, i}

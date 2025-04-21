@@ -9,8 +9,7 @@
 </script>
 
 <div class="p-8" in:fade={{ delay: 950 }}>
-	<Title title={"Featured Projects"}/>
-
+	<Title title={'Featured Projects'} />
 
 	<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 		{#each projects as project, i}

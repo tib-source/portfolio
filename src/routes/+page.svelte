@@ -18,7 +18,6 @@
 </main>
 
 <style lang="scss">
-
 	// .buttons{
 	// 	font-family: sans-serif;
 	// 	position: relative;

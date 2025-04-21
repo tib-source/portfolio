@@ -19,9 +19,9 @@ export const resumeData = {
 			company: 'Matillion, Manchester',
 			period: 'July 2024 - Present',
 			achievements: [
-				"Developed and maintained an internal tool used to migrate over 700 repositories",
-				"Designed a Jfrog artifact cleaner to reduce storage costs and sped up ArgoCD deployments",
-				"Worked with MIT interns to create an internal copilot trained on documentation for employees",
+				'Developed and maintained an internal tool used to migrate over 700 repositories',
+				'Designed a Jfrog artifact cleaner to reduce storage costs and sped up ArgoCD deployments',
+				'Worked with MIT interns to create an internal copilot trained on documentation for employees'
 			],
 			skills: ['Kubernetes', 'ArgoCD', 'Python', 'Terraform', 'Docker']
 		},
@@ -30,9 +30,9 @@ export const resumeData = {
 			company: 'The Dream Corporation(Otherworld VR), London',
 			period: 'October 2023 - July 2024',
 			achievements: [
-				"Managed urgent escalations from 1st Line Experience Guides and Floor Team Members",
-				"Monitored the uptime and performance of on-premises and cloud systems",
-				"Communicated with guests directly via VoIP to provide calm and reassuring technical support"
+				'Managed urgent escalations from 1st Line Experience Guides and Floor Team Members',
+				'Monitored the uptime and performance of on-premises and cloud systems',
+				'Communicated with guests directly via VoIP to provide calm and reassuring technical support'
 			],
 			skills: ['Ansible', 'Python', 'Networking', 'Windows']
 		}

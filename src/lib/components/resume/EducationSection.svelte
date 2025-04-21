@@ -12,7 +12,7 @@
 </script>
 
 <div class="border-b border-[#e8d5c4]/10 p-8" in:fade={{ delay: 300 }}>
-	<Title title={"Education"}/>
+	<Title title={'Education'} />
 
 	{#each education as edu, i}
 		<div class="mb-6 {i === education.length - 1 ? '' : 'mb-6'}" in:fade={{ delay: 350 + i * 50 }}>

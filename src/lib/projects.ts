@@ -26,7 +26,7 @@ const projects: project[] = [
 		description:
 			'A halloween themed project made for easiliy deleting GitHub repositories. It connects to your GitHub using OAuth and allows you to select multiple repositories to delete.',
 		tech: ['Svelte', 'TypeScript', 'Tailwind CSS', 'Firebase'],
-		link: 'https://tibebe.co.uk/GrimRepoer',
+		link: 'https://tib-source.github.io/GrimRepoer/',
 		source: 'https://github.com/tib-source/GrimRepoer',
 		image: grim
 	},

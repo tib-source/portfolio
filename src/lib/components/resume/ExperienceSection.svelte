@@ -14,8 +14,7 @@
 </script>
 
 <div class="border-b border-[#e8d5c4]/10 p-8" in:fade={{ delay: 100 }}>
-	<Title title="Work Experience"/>
-
+	<Title title="Work Experience" />
 
 	{#each experience as job, i}
 		<div class="mb-8 {i === experience.length - 1 ? '' : 'mb-8'}" in:fade={{ delay: 150 + i * 50 }}>

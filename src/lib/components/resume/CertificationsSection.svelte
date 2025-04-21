@@ -9,7 +9,7 @@
 </script>
 
 <div class="border-b border-[#e8d5c4]/10 p-8" in:fade={{ delay: 700 }}>
-	<Title title={"Certificate Awards"}/>
+	<Title title={'Certificate Awards'} />
 
 	<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 		{#each certifications as cert, i}
