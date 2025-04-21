@@ -8,7 +8,7 @@ const config = {
 	preprocess: vitePreprocess(),
 	ssr: false,
 	prerender: {
-		enabled: false
+		default: true
 	},
 	kit: {
 		// adapter-auto only supports some environments, see https://kit.svelte.dev/docs/adapter-auto for a list.
@@ -17,7 +17,7 @@ const config = {
 		adapter: adapter({
 			pages: 'build',
 			assets: 'build',
-			fallback: 'index.html',
+			fallback: '404.html',
 			precompress: false
 		})
 	}
