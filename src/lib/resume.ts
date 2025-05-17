@@ -10,17 +10,19 @@ export const resumeData = {
 		phone: '',
 		avatar: me
 	},
-	summary: `Hey 👋, I’m an international student from Ethiopia. Right now, I’m diong my placement at Matillion, working on everything from repo migrations, incident management to internal tooling. Before that, I was keeping VR systems alive (and customers happy) at Otherworld. Outside of work, I love building random projects — currently designing a bible reading app for the Ethiopian Orthodox version. When I’m not coding, you’ll find me learning Spanish, kicking pads at Muay Thai, or watching an obscure anime`,
+	summary: `Hey 👋, I’m an international student from Ethiopia. Right now, I’m doing my placement at Matillion, working on everything from repo migrations, incident management to internal tooling. Before that, I was keeping VR systems alive (and customers happy) at Otherworld. Outside of work, I love building random projects — currently designing a bible reading app for the Ethiopian Orthodox version. When I’m not coding, you’ll find me learning Spanish, kicking pads at Muay Thai, or watching an obscure anime`,
 	experience: [
 		{
 			position: 'Software Engineer Placement - DevX',
 			company: 'Matillion, Manchester',
 			period: 'July 2024 - Present',
 			achievements: [
-				'Developed and maintained an internal tool used to migrate over 700 repositories',
-				'Designed a Jfrog artifact cleaner to reduce storage costs and sped up ArgoCD deployments',
-				'Worked with MIT interns to create an internal copilot trained on documentation for employees'
-			],
+			'Migrated 700+ repos from Bitbucket to GitHub with a Python tool, cutting manual effort by 90%.',
+			'Built "Maker" CLI to automate local Kubernetes & ArgoCD development environments.',
+			'Developed an Artifactory cleanup utility, reclaiming over 400GB of storage and preventing stale artifacts.',
+			'Rotated as DevX support, resolving Terraform, PagerDuty, GitHub, CircleCI, and Maker issues via Slack.',
+			'Wrote documentation and led workshops for Maker to boost internal adoption.'
+		],
 			skills: ['Kubernetes', 'ArgoCD', 'Python', 'Terraform', 'Docker']
 		},
 		{

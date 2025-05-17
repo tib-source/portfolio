@@ -20,9 +20,14 @@
 <main>
 	<div class="intro">
 		<div class="text prevent-select">
-			<h1 in:fly={{ x: -100, duration: 500, delay: 100 }}>HELL</h1>
+			<div class="hello">
+				<h1 in:fly={{ x: -100, duration: 500, delay: 50 }}>H</h1>
+				<h1 in:fly={{ x: -100, duration: 500, delay: 100 }}>E</h1>
+				<h1 in:fly={{ x: -100, duration: 500, delay: 150 }}>L</h1>
+				<h1 in:fly={{ x: -100, duration: 500, delay: 200 }}>L</h1>
+			</div>
 			<p in:fly={{ x: -100, duration: 500, delay: 0 }}>
-				I'm <span>Tibebe</span>, welcome to my portfolio
+				I'm <span>Tibebe</span>, A Software Engineer based in London
 			</p>
 		</div>
 
@@ -31,11 +36,9 @@
 				class="me prevent-select"
 				src={profilePic}
 				alt="Me basking in the sun"
-				width="300"
-				height="300"
 				loading="lazy"
 				decoding="async"
-				in:fade={{ duration: 300 }}
+				in:fly={{ x: -100, duration: 500, delay: 250 }}
 			/>
 		{:else}
 			<div class="me-placeholder prevent-select"></div>
@@ -51,32 +54,38 @@
 	}
 
 	main {
-		width: 100%;
 		font-family: 'Londrina Solid', sans-serif;
 		display: flex;
 		flex-direction: column;
+		margin: auto;
 		justify-content: center;
 		align-items: center;
 		height: 80vh;
 		contain: content;
 
 		.intro {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
+			padding: 4rem;
+			display: flex;
+			justify-content: center;
+			align-items: center;
 			align-items: center;
 			color: white;
 			will-change: transform;
 
+			.hello{ 
+				display: flex;
+			}
+
 			.me,
 			.me-placeholder {
 				z-index: -100;
-				width: 300px;
+				width: 190px;
 				aspect-ratio: 1 / 1;
 				border-radius: 50%;
 				box-shadow:
 					0.75rem 0 var(--secondary),
 					0rem 0 10rem color-mix(in srgb, var(--secondary) 30%, transparent);
-				border: 0.25rem solid white;
+				border: .25rem solid white;
 			}
 
 			.me-placeholder {
@@ -116,27 +125,25 @@
 	@media (max-width: 768px) {
 		main {
 			.intro {
-				display: flex;
-
-				.me,
-				.me-placeholder {
-					position: relative;
-					width: 150px;
-					top: -2rem;
-					left: 3rem;
-					aspect-ratio: 1 / 1;
+				gap: 2rem;
+				position: relative;
+				.me{
+					width: 90px;
+					margin-bottom: -1rem;
 				}
-				.text {
-					width: 80px;
+				.text {					
+					width: 150px;
+					justify-content: center;
 					h1 {
-						font-size: 5rem;
-						letter-spacing: 0.5rem;
+						font-size: 6rem;
+						letter-spacing: 0.15rem;
 						text-shadow: 0 0 10px rgba(255, 255, 255, 0.435);
+						margin-bottom: -1.5rem;
 					}
 					P {
-						top: 6rem;
-						left: 1rem;
-						font-size: 1rem;
+						top: 7rem;
+						left: 0rem;
+						font-size: .85rem;
 					}
 				}
 			}
