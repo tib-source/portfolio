@@ -3,6 +3,7 @@ import grim from '$lib/assets/projects/grim_repoer.png';
 import protfolio from '$lib/assets/background.webp';
 import flamingo from '$lib/assets/projects/flamingo.png';
 import calculator from '$lib/assets/projects/calculator.jpg';
+import tinat from '$lib/assets/projects/tinat.png'
 
 export interface project {
 	name: string;
@@ -14,6 +15,15 @@ export interface project {
 }
 
 const projects: project[] = [
+	{
+		name: 'Tinat',
+		description:
+			'A gamified bible learning app for Ethiopian Orthodox members. Has a fully functional calendar system that has all the fasts and feats that we celebrate.',
+		tech: ['React Native', 'TypeScript', 'Tailwind', 'Expo'],
+		link: 'https://bible.tibebe.co.uk',
+		source: 'https://github.com/tib-source/Tinat',
+		image: tinat
+	},
 	{
 		name: 'Ergon',
 		description:
@@ -49,14 +59,6 @@ const projects: project[] = [
 		source: 'https://github.com/tib-source/flamingo',
 		image: flamingo
 	},
-	{
-		name: 'Calculator App',
-		description: 'A simple calculator app which I made while learning React.',
-		tech: ['React', 'Styled Components'],
-		link: 'https://tib-source.github.io/calculator-react/',
-		source: 'https://github.com/tib-source/calculator-react',
-		image: calculator
-	}
 ];
 
 export default projects;
