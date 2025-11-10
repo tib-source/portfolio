@@ -15,7 +15,16 @@ export function generateArena() {
 
 }
 
+export function buildLevel() { 
+  LJS.engineDestroyObjects();
 
+  loadLevelData();
+}
+
+
+function loadLevelData(){
+  
+}
 
 export function drawWalls(){
     // draw walls

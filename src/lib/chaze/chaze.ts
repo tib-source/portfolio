@@ -14,6 +14,8 @@ export let player: Player;
 let particleEmitter;
 
 
+const levels = {};
+
 ///////////////////////////////////////////////////////////////////////////////
 export function gameInit()
 {
