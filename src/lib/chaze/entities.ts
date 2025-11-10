@@ -9,7 +9,7 @@ export class Player extends LJS.EngineObject{
 
 
     constructor(pos: LJS.Vector2){
-        super(pos, LJS.vec2(2), Game.spriteAtlas.pawn, 0);
+        super(pos,LJS.vec2(1), Game.spriteAtlas.pawn, 0);
         this.setCollision()
         this.renderOrder = 1
         this.shootTimer = LJS.Timer
@@ -17,11 +17,11 @@ export class Player extends LJS.EngineObject{
 
     update(): void {
         // apply movement controls
-        const moveInput = LJS.keyDirection().clampLength(1).scale(.2);
+        const moveInput = LJS.keyDirection().clampLength(1).scale(.3);
         if (moveInput.length()) {
-            this.velocity = moveInput; // Move at fixed speed
+            this.velocity = moveInput;
         } else {
-            this.velocity = LJS.vec2(0); // Stop moving
+            this.velocity = LJS.vec2(0);
         }
 
         const direction = LJS.mousePos.subtract(this.pos).normalize();

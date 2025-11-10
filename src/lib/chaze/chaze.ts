@@ -2,6 +2,7 @@
 import * as LJS from "littlejsengine"
 import { Player } from "$lib/chaze/entities";
 import * as GameLevel from "$lib/chaze/gameLevel";
+import level1 from "$lib/chaze/map/level1.json";
 
 const {vec2, rgb} = LJS;
 
@@ -14,7 +15,9 @@ export let player: Player;
 let particleEmitter;
 
 
-const levels = {};
+export const levels = [
+    level1
+]
 
 ///////////////////////////////////////////////////////////////////////////////
 export function gameInit()
@@ -30,6 +33,7 @@ export function gameInit()
     // create a table of all sprites
     LJS.setCanvasClearColor(LJS.hsl(.3,.2,.6))
     const gameTile = (i: number | LJS.Vector2, size=64)=> LJS.tile(i, size, 0, 0);
+    
     spriteAtlas =
     {
         // player tiles 
@@ -48,8 +52,11 @@ export function gameInit()
 
     };
 
-    GameLevel.drawWalls()
-    player = new Player(vec2(GRID_SIZE/2, GRID_SIZE/2));
+    let playerStartPos = GameLevel.buildLevel()
+    if (!playerStartPos){
+        playerStartPos = vec2(0,1)
+    }
+    player = new Player(playerStartPos);
     LJS.setCameraPos(GameLevel.getCameraTarget());
 
 
