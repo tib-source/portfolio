@@ -13,8 +13,8 @@ export function generateArena() {
     }
   }
 
-
 }
+
 
 
 export function drawWalls(){
