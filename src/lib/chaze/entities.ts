@@ -41,7 +41,9 @@ export class Player extends LJS.EngineObject{
         const bullet = new LJS.EngineObject(this.pos, LJS.vec2(.2,.5), undefined, angle);
         bullet.velocity = direction
         bullet.setCollision()
+        this.velocity = LJS.vec2(0.0002).setAngle(angle - Deg2Rad(180)).clampLength(0.1);
     }
+
 
 
 }

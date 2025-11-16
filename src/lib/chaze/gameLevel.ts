@@ -3,6 +3,12 @@
 import * as LJS from "littlejsengine"; 
 import * as GameObjects from "$lib/chaze/entities";
 import * as Game from "$lib/chaze/chaze"
+import { hsl } from "littlejsengine";
+
+export let mapLayers: Array<LJS.TileCollisionLayer>;
+export let levelSize: LJS.Vector2;
+export let foregroundTileLayer: LJS.TileCollisionLayer;
+export let tileLookup: any;
 
 
 const walls = [];
@@ -24,9 +30,10 @@ export function buildLevel() {
 function loadLevelData(level: number){
   let playerStartPos;
   const currLevel = Game.levels[level]
-  console.log(currLevel )
+  // console.log(currLevel )
   const mapLayers = LJS.tileLayersLoad(currLevel, LJS.tile(0,64,0),0, 1);
   const levelSize = mapLayers[0].size;
+  let foregroundTileLayer = mapLayers[0]
 
 
   const tileLookup = {
@@ -44,9 +51,17 @@ function loadLevelData(level: number){
 
   }
 
-  for (let i = mapLayers.length; i--;){
+  console.log(mapLayers.length)
+
+  for (let i = mapLayers.length -1 ; i > -1 ; i--){
+
+    const isForeground = i == 0;
     let mapLayer = mapLayers[i];
-    mapLayer.isSolid = true
+    if (isForeground)
+      foregroundTileLayer = mapLayer;
+    
+    console.log(mapLayer, i, "meow")
+    
 
     for (let x = levelSize.x; x--;)
     for (let y = levelSize.y; y--;){
@@ -54,22 +69,28 @@ function loadLevelData(level: number){
       const pos = LJS.vec2(x, levelSize.y-1-y); 
       const tileData = mapLayer.getData(pos).tile
 
-
       const objectPos = pos.add(LJS.vec2(.5))
       if (tileData == tileLookup.pawn){
         playerStartPos = objectPos
-      }
 
-      if (tileData == tileLookup.wall){
-        let o = new LJS.EngineObject(objectPos, LJS.vec2(1), Game.spriteAtlas.wall)
-        o.setCollision()
-        o.mass = 0
+                    // replace with empty tile and empty collision
+      mapLayer.clearData(pos);
+      mapLayer.clearCollisionData(pos);
+      continue;
+
+
       }
 
       if (tileData == tileLookup.rook){
         let o = new LJS.EngineObject(objectPos, LJS.vec2(1), Game.spriteAtlas.rook)
         o.setCollision()
         o.mass = 0
+
+                    // replace with empty tile and empty collision
+      mapLayer.clearData(pos);
+      mapLayer.clearCollisionData(pos);
+      continue;
+
       }
 
       if (tileData == tileLookup.knight){
@@ -77,14 +98,53 @@ function loadLevelData(level: number){
         o.setCollision()
         o.mass=0
 
-      }
-    }
+                    // replace with empty tile and empty collision
+      mapLayer.clearData(pos);
+      mapLayer.clearCollisionData(pos);
+      continue;
 
-    return playerStartPos;
+      }
+
+
+      if (tileData == tileLookup.wall){
+        let o = new LJS.EngineObject(objectPos, LJS.vec2(1), Game.spriteAtlas.wall)
+        o.setCollision()
+        o.mass=0
+
+                    // replace with empty tile and empty collision
+        mapLayer.clearData(pos);
+        mapLayer.clearCollisionData(pos);
+        continue;
+
+      }
+
+
+
+        mapLayer.onRedraw = ()=>
+        {
+            // apply decoration to level tiles
+            for (let x=levelSize.x; x--;)
+            for (let y=levelSize.y; y--;)
+              decorateTile(LJS.vec2(x,y), mapLayer);
+        }
+        mapLayer.redraw();
+      
+      }
+
+
+
   }
 
+  return playerStartPos;
 
 }
+
+
+export function decorateTile(pos: LJS.Vector2, tileLayer: LJS.TileCollisionLayer)
+{
+    
+}
+
 
 export function drawWalls(){
 
