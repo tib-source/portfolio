@@ -59,9 +59,7 @@ function loadLevelData(level: number){
     let mapLayer = mapLayers[i];
     if (isForeground)
       foregroundTileLayer = mapLayer;
-    
-    console.log(mapLayer, i, "meow")
-    
+        
 
     for (let x = levelSize.x; x--;)
     for (let y = levelSize.y; y--;){
@@ -73,10 +71,10 @@ function loadLevelData(level: number){
       if (tileData == tileLookup.pawn){
         playerStartPos = objectPos
 
-                    // replace with empty tile and empty collision
-      mapLayer.clearData(pos);
-      mapLayer.clearCollisionData(pos);
-      continue;
+        // replace with empty tile and empty collision
+        mapLayer.clearData(pos);
+        mapLayer.clearCollisionData(pos);
+        continue;
 
 
       }
@@ -86,10 +84,10 @@ function loadLevelData(level: number){
         o.setCollision()
         o.mass = 0
 
-                    // replace with empty tile and empty collision
-      mapLayer.clearData(pos);
-      mapLayer.clearCollisionData(pos);
-      continue;
+        // replace with empty tile and empty collision
+        mapLayer.clearData(pos);
+        mapLayer.clearCollisionData(pos);
+        continue;
 
       }
 
@@ -98,20 +96,7 @@ function loadLevelData(level: number){
         o.setCollision()
         o.mass=0
 
-                    // replace with empty tile and empty collision
-      mapLayer.clearData(pos);
-      mapLayer.clearCollisionData(pos);
-      continue;
-
-      }
-
-
-      if (tileData == tileLookup.wall){
-        let o = new LJS.EngineObject(objectPos, LJS.vec2(1), Game.spriteAtlas.wall)
-        o.setCollision()
-        o.mass=0
-
-                    // replace with empty tile and empty collision
+        // replace with empty tile and empty collision
         mapLayer.clearData(pos);
         mapLayer.clearCollisionData(pos);
         continue;
@@ -120,13 +105,53 @@ function loadLevelData(level: number){
 
 
 
-        mapLayer.onRedraw = ()=>
-        {
-            // apply decoration to level tiles
-            for (let x=levelSize.x; x--;)
-            for (let y=levelSize.y; y--;)
-              decorateTile(LJS.vec2(x,y), mapLayer);
-        }
+      if (tileData == tileLookup.bishop){
+        let o = new LJS.EngineObject(objectPos, LJS.vec2(1), Game.spriteAtlas.bishop)
+        o.setCollision()
+        o.mass=0
+
+        // replace with empty tile and empty collision
+        mapLayer.clearData(pos);
+        mapLayer.clearCollisionData(pos);
+        continue;
+
+      }
+
+
+
+      if (tileData == tileLookup.coin){
+        new GameObjects.Coin(objectPos)
+
+        // replace with empty tile and empty collision
+        mapLayer.clearData(pos);
+        mapLayer.clearCollisionData(pos);
+        continue;
+
+      }
+
+
+      if (tileData == tileLookup.potion){
+        new GameObjects.Potion(objectPos)
+
+        // replace with empty tile and empty collision
+        mapLayer.clearData(pos);
+        mapLayer.clearCollisionData(pos);
+        continue;
+
+      }
+
+      if (tileData == tileLookup.wall){
+        let o = new LJS.EngineObject(objectPos, LJS.vec2(1), Game.spriteAtlas.wall)
+        o.setCollision()
+        o.mass=0
+
+        // replace with empty tile and empty collision
+        mapLayer.clearData(pos);
+        mapLayer.clearCollisionData(pos);
+        continue;
+
+      }
+
         mapLayer.redraw();
       
       }
@@ -138,13 +163,6 @@ function loadLevelData(level: number){
   return playerStartPos;
 
 }
-
-
-export function decorateTile(pos: LJS.Vector2, tileLayer: LJS.TileCollisionLayer)
-{
-    
-}
-
 
 export function drawWalls(){
 
