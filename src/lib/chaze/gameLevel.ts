@@ -80,10 +80,7 @@ function loadLevelData(level: number){
       }
 
       if (tileData == tileLookup.rook){
-        let o = new LJS.EngineObject(objectPos, LJS.vec2(1), Game.spriteAtlas.rook)
-        o.setCollision()
-        o.mass = 0
-
+        new GameObjects.Rook(objectPos)
         // replace with empty tile and empty collision
         mapLayer.clearData(pos);
         mapLayer.clearCollisionData(pos);
@@ -92,9 +89,7 @@ function loadLevelData(level: number){
       }
 
       if (tileData == tileLookup.knight){
-        let o = new LJS.EngineObject(objectPos, LJS.vec2(1), Game.spriteAtlas.knight)
-        o.setCollision()
-        o.mass=0
+        new GameObjects.Knight(objectPos)
 
         // replace with empty tile and empty collision
         mapLayer.clearData(pos);
@@ -106,9 +101,7 @@ function loadLevelData(level: number){
 
 
       if (tileData == tileLookup.bishop){
-        let o = new LJS.EngineObject(objectPos, LJS.vec2(1), Game.spriteAtlas.bishop)
-        o.setCollision()
-        o.mass=0
+        new GameObjects.Bishop(objectPos)
 
         // replace with empty tile and empty collision
         mapLayer.clearData(pos);

@@ -10,13 +10,18 @@ export class GameObject extends LJS.EngineObject
     health: number;
     isGameObject: number;
     damageTimer: LJS.Timer;   
-    
-    constructor(pos: LJS.Vector2, size?: LJS.Vector2, tileInfo?: LJS.TileInfo, angle?: number)
+    displayHUD: boolean;
+    fullHealth;
+    isEnemy: boolean;
+    constructor(pos: LJS.Vector2, size?: LJS.Vector2, tileInfo?: LJS.TileInfo, angle?: number, displayHUD?: boolean)
     {
         super(pos, size, tileInfo, angle);
-        this.health = 0;
+        this.fullHealth = 100;
+        this.health = this.fullHealth;
         this.isGameObject = 1;
         this.damageTimer = new LJS.Timer;
+        this.displayHUD = false
+        this.isEnemy = false
     }
 
     update()
@@ -54,6 +59,19 @@ export class GameObject extends LJS.EngineObject
 
     isDead()                { return !this.health; }
     kill(damagingObject: GameObject)    { this.destroy(); }
+
+    render(){
+        if (this.displayHUD){
+            let x = this.health/this.fullHealth
+            let base = 1
+
+            let healthColor = this.isEnemy ? LJS.RED : LJS.GREEN
+            LJS.drawRect(this.pos.add(vec2(0 ,base)), vec2(1.05, .2), LJS.BLACK);
+            LJS.drawRect(this.pos.add(vec2(-.50 +  (x / 2), base)), vec2(x, .15), healthColor);
+        }
+
+        super.render()
+    }
 }
 
 
@@ -66,7 +84,6 @@ export class Player extends GameObject{
     bulletDamage;
     fireTimeBuffer;
     recoilTimer;
-    shellEmitter;
 
 
     constructor(pos: LJS.Vector2){
@@ -80,24 +97,12 @@ export class Player extends GameObject{
         this.fireRate      = 8;
         this.bulletSpeed   = vec2(.5);
         this.bulletSpread  = .1;
-        this.bulletDamage  = 1;
+        this.bulletDamage  = 10;
 
         // prepare to fire
         this.fireTimeBuffer = this.localAngle = 0;
         this.recoilTimer = new LJS.Timer;
-
-        // shell effect
-        this.addChild(this.shellEmitter = new LJS.ParticleEmitter(
-            LJS.vec2(), 0, 0, 0, 0, .1,  // pos, angle, size, time, rate, cone
-            undefined,                       // tileInfo
-            LJS.rgb(1,.8,.5), LJS.rgb(.9,.7,.5), // colorStartA, colorStartB
-            LJS.rgb(1,.8,.5), LJS.rgb(.9,.7,.5), // colorEndA, colorEndB
-            3, .1, .1, .15, .1, // time, sizeStart, sizeEnd, speed, angleSpeed
-            1, .95, 1, 0, 0,    // damp, angleDamp, gravity, particleCone, fade
-            .1, true               // randomness, collide
-        ), LJS.vec2(.1,0), -.8);
-        this.shellEmitter.restitution = .5;
-        // this.shellEmitter.particleDestroyCallback = GameEffects.persistentParticleDestroyCallback;
+        this.displayHUD = true
     }
 
     update(): void {
@@ -123,28 +128,46 @@ export class Player extends GameObject{
 
     shoot(angle: number): void { 
         const direction = LJS.vec2(5*this.getMirrorSign(), 0).setAngle(angle);
-        this.velocity = LJS.vec2(0.0002).setAngle(angle - Deg2Rad(180)).clampLength(0.1);
+        this.applyForce(LJS.vec2(1).setAngle(angle - Deg2Rad(180)).clampLength(0.1))
         const velocity = direction.rotate(LJS.rand(-1,1)*this.bulletSpread);
-        new Bullet(this.pos, this.parent, velocity, this.bulletDamage, angle);
-        // spawn shell particle
-        this.shellEmitter.emitParticle();
+        
+        new Bullet(this.pos, this, velocity, this.bulletDamage, angle);
     }
 
 
 
 }
 
+export class Enemy extends GameObject{
+      constructor(pos: LJS.Vector2, tileInfo: LJS.TileInfo){
+        super(pos, vec2(1), tileInfo )
+        this.displayHUD = true
+        this.isEnemy = true
+        this.setCollision()
+        this.renderOrder = 1
 
-export class Bishop extends GameObject{
+
+      }
+}
+
+
+export class Bishop extends Enemy {
+    constructor(pos: LJS.Vector2){
+        super(pos, Game.spriteAtlas.bishop)
+    }
 
 }
 
-export class Knight extends GameObject{
-
+export class Knight extends Enemy {
+    constructor(pos: LJS.Vector2){
+        super(pos, Game.spriteAtlas.knight)
+    }
 }
 
-export class Rook extends GameObject{
-
+export class Rook extends Enemy {
+    constructor(pos: LJS.Vector2){
+        super(pos, Game.spriteAtlas.rook)
+    }
 }
 
 
@@ -238,11 +261,14 @@ export class Bullet extends LJS.EngineObject
     update()
     {
         // check if hit someone
-        // LJS.engineObjectsCallback(this.pos, this.size, (o: LJS.EngineObject)=>
-        // {
-        //     if (o instanceof GameObject && o.isGameObject)
-        //         this.collideWithObject(o)
-        // });
+        LJS.engineObjectsCallback(this.pos, this.size, (o: LJS.EngineObject)=>
+        {
+            if (o instanceof GameObject && o.isGameObject && o != this.attacker){
+                console.log(o)
+                this.collideWithObject(o)
+            }
+
+        });
 
         this.angle = this.velocity.angle();
         this.range -= this.getSpeed();
@@ -266,11 +292,13 @@ export class Bullet extends LJS.EngineObject
         if (o.isGameObject && o != this.attacker)
         {
             o.damage(this.damage, o);
-            o.applyForce(this.velocity.scale(.1));
+            o.applyForce(this.velocity.scale(.001));
         }
+
+        this.kill()
+        return true;
     
-        this.kill();
-        return true; 
+
     }
 
     kill()
