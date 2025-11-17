@@ -1,6 +1,7 @@
 
 import * as LJS from "littlejsengine";
 import * as Game from "$lib/chaze/chaze"
+import * as AI from "$lib/chaze/ai"
 import { vec2 } from "littlejsengine";
 
 
@@ -139,14 +140,46 @@ export class Player extends GameObject{
 }
 
 export class Enemy extends GameObject{
+    wayPoints: LJS.Vector2[];
+    patrolRadius;
+    nextPos: LJS.Vector2 | undefined;
+    patrolSpeed;
       constructor(pos: LJS.Vector2, tileInfo: LJS.TileInfo){
         super(pos, vec2(1), tileInfo )
         this.displayHUD = true
         this.isEnemy = true
         this.setCollision()
         this.renderOrder = 1
+        this.patrolRadius = 5
+        this.wayPoints = []
+        this.patrolSpeed = 0.05
+      }
 
+      update(): void {
+          this.patrol()
+      }
+      patrol(){
 
+        if (this.wayPoints.length == 0){
+            this.wayPoints = AI.getAvailablePointsNearObjectBFS(this, this.patrolRadius)
+        }
+        if( LJS.debugOverlay){
+            for (let item of this.wayPoints){
+                LJS.debugPoint(item, LJS.GREEN, 0.1)
+            }
+        }
+        if (!this.nextPos || this.pos.distance(this.nextPos) < .5){
+            this.nextPos = AI.pickRandomPoints(this.wayPoints)
+        }
+
+        if(this.nextPos)
+            this.applyForce((this.nextPos.subtract(this.pos).normalize(.001)))
+        
+            // if (LJS.debugOverlay){
+            //     LJS.debugPoint(next_pos, LJS.RED, 0.1)
+            // }
+
+        // this.velocity = this.velocity.clampLength(this.patrolSpeed);
       }
 }
 
@@ -154,6 +187,7 @@ export class Enemy extends GameObject{
 export class Bishop extends Enemy {
     constructor(pos: LJS.Vector2){
         super(pos, Game.spriteAtlas.bishop)
+
     }
 
 }
@@ -161,6 +195,14 @@ export class Bishop extends Enemy {
 export class Knight extends Enemy {
     constructor(pos: LJS.Vector2){
         super(pos, Game.spriteAtlas.knight)
+    }
+
+
+    update(): void {
+        this.patrol()
+
+        super.update()
+
     }
 }
 

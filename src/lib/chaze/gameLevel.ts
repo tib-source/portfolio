@@ -68,6 +68,40 @@ function loadLevelData(level: number){
       const tileData = mapLayer.getData(pos).tile
 
       const objectPos = pos.add(LJS.vec2(.5))
+
+      if (tileData == tileLookup.coin){
+        new GameObjects.Coin(objectPos)
+
+        // replace with empty tile and empty collision
+        mapLayer.clearData(pos);
+        mapLayer.clearCollisionData(pos);
+        continue;
+
+      }
+
+
+      if (tileData == tileLookup.potion){
+        new GameObjects.Potion(objectPos)
+
+        // replace with empty tile and empty collision
+        mapLayer.clearData(pos);
+        mapLayer.clearCollisionData(pos);
+        continue;
+
+      }
+
+      if (tileData == tileLookup.wall){
+        let o = new LJS.EngineObject(objectPos, LJS.vec2(1), Game.spriteAtlas.wall)
+        o.setCollision()
+        o.mass=0
+        o.isSolid=true
+
+        // replace with empty tile and empty collision
+        mapLayer.setCollisionData(pos, 1)
+        continue;
+
+      }
+
       if (tileData == tileLookup.pawn){
         playerStartPos = objectPos
 
@@ -102,41 +136,6 @@ function loadLevelData(level: number){
 
       if (tileData == tileLookup.bishop){
         new GameObjects.Bishop(objectPos)
-
-        // replace with empty tile and empty collision
-        mapLayer.clearData(pos);
-        mapLayer.clearCollisionData(pos);
-        continue;
-
-      }
-
-
-
-      if (tileData == tileLookup.coin){
-        new GameObjects.Coin(objectPos)
-
-        // replace with empty tile and empty collision
-        mapLayer.clearData(pos);
-        mapLayer.clearCollisionData(pos);
-        continue;
-
-      }
-
-
-      if (tileData == tileLookup.potion){
-        new GameObjects.Potion(objectPos)
-
-        // replace with empty tile and empty collision
-        mapLayer.clearData(pos);
-        mapLayer.clearCollisionData(pos);
-        continue;
-
-      }
-
-      if (tileData == tileLookup.wall){
-        let o = new LJS.EngineObject(objectPos, LJS.vec2(1), Game.spriteAtlas.wall)
-        o.setCollision()
-        o.mass=0
 
         // replace with empty tile and empty collision
         mapLayer.clearData(pos);
