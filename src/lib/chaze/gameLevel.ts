@@ -51,7 +51,6 @@ function loadLevelData(level: number){
 
   }
 
-  console.log(mapLayers.length)
 
   for (let i = mapLayers.length -1 ; i > -1 ; i--){
 
@@ -147,8 +146,6 @@ function loadLevelData(level: number){
         mapLayer.redraw();
       
       }
-
-
 
   }
 

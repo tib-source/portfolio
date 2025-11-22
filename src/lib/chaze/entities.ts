@@ -156,8 +156,9 @@ export class Enemy extends GameObject{
       }
 
       update(): void {
-          this.patrol()
+        this.patrol()
       }
+
       patrol(){
 
         if (this.wayPoints.length == 0){
@@ -168,18 +169,15 @@ export class Enemy extends GameObject{
                 LJS.debugPoint(item, LJS.GREEN, 0.1)
             }
         }
-        if (!this.nextPos || this.pos.distance(this.nextPos) < .5){
+        if (!this.nextPos || this.pos.distance(this.nextPos) <= .5){
             this.nextPos = AI.pickRandomPoints(this.wayPoints)
         }
 
-        if(this.nextPos)
+        if(this.nextPos){
             this.applyForce((this.nextPos.subtract(this.pos).normalize(.001)))
-        
-            // if (LJS.debugOverlay){
-            //     LJS.debugPoint(next_pos, LJS.RED, 0.1)
-            // }
-
-        // this.velocity = this.velocity.clampLength(this.patrolSpeed);
+            if (LJS.debugOverlay)
+                LJS.debugPoint(this.nextPos, LJS.RED, 0.01)
+        }
       }
 }
 
@@ -198,12 +196,12 @@ export class Knight extends Enemy {
     }
 
 
-    update(): void {
-        this.patrol()
+    // update(): void {
+    //     this.patrol()
 
-        super.update()
+    //     super.update()
 
-    }
+    // }
 }
 
 export class Rook extends Enemy {
@@ -306,7 +304,6 @@ export class Bullet extends LJS.EngineObject
         LJS.engineObjectsCallback(this.pos, this.size, (o: LJS.EngineObject)=>
         {
             if (o instanceof GameObject && o.isGameObject && o != this.attacker){
-                console.log(o)
                 this.collideWithObject(o)
             }
 
