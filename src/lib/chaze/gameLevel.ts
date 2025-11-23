@@ -32,7 +32,7 @@ function loadLevelData(level: number){
   const currLevel = Game.levels[level]
   // console.log(currLevel )
   const mapLayers = LJS.tileLayersLoad(currLevel, LJS.tile(0,64,0),0, 1);
-  const levelSize = mapLayers[0].size;
+  levelSize = mapLayers[0].size;
   let foregroundTileLayer = mapLayers[0]
 
 
@@ -90,12 +90,9 @@ function loadLevelData(level: number){
       }
 
       if (tileData == tileLookup.wall){
-        let o = new LJS.EngineObject(objectPos, LJS.vec2(1), Game.spriteAtlas.wall)
+        let o = new LJS.EngineObject(objectPos, LJS.vec2(.5), LJS.tile(10, 64, 0, 0))
         o.setCollision()
-        o.mass=0
-        o.isSolid=true
-
-        // replace with empty tile and empty collision
+        o.mass = 0
         mapLayer.setCollisionData(pos, 1)
         continue;
 
@@ -112,18 +109,20 @@ function loadLevelData(level: number){
 
       }
 
-      if (tileData == tileLookup.rook){
-        new GameObjects.Rook(objectPos)
-        // replace with empty tile and empty collision
-        mapLayer.clearData(pos);
-        mapLayer.clearCollisionData(pos);
-        continue;
+      // if (tileData == tileLookup.rook){
+      //   new GameObjects.Rook(objectPos)
+      //   node.walkable = false 
+      //   // replace with empty tile and empty collision
+      //   mapLayer.clearData(pos);
+      //   mapLayer.clearCollisionData(pos);
+          // Gird.set(gridKey(pos), node)
 
-      }
+      //   continue;
+
+      // }
 
       if (tileData == tileLookup.knight){
         new GameObjects.Knight(objectPos)
-
         // replace with empty tile and empty collision
         mapLayer.clearData(pos);
         mapLayer.clearCollisionData(pos);
@@ -133,15 +132,15 @@ function loadLevelData(level: number){
 
 
 
-      if (tileData == tileLookup.bishop){
-        new GameObjects.Bishop(objectPos)
+      // if (tileData == tileLookup.bishop){
+      //   new GameObjects.Bishop(objectPos)
+      //   node.walkable = false 
+      //   // replace with empty tile and empty collision
+      //   mapLayer.clearData(pos);
+      //   mapLayer.clearCollisionData(pos);
+      //   continue;
 
-        // replace with empty tile and empty collision
-        mapLayer.clearData(pos);
-        mapLayer.clearCollisionData(pos);
-        continue;
-
-      }
+      // }
 
         mapLayer.redraw();
       

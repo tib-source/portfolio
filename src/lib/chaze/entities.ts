@@ -5,6 +5,18 @@ import * as AI from "$lib/chaze/ai"
 import { vec2 } from "littlejsengine";
 
 
+const KNIGHT_HEALTH = 250
+const ROOK_HEALTH   = 300;
+const BISHIP_HEALTH = 500;
+
+enum STATE{
+    IDLE="IDLE",
+    PATROL="PATROL",
+    ATTACK="ATTACK",
+    FLEE="FLEE",
+    DEAD="DEAD",
+}
+
 export class GameObject extends LJS.EngineObject 
 {
 
@@ -12,21 +24,49 @@ export class GameObject extends LJS.EngineObject
     isGameObject: number;
     damageTimer: LJS.Timer;   
     displayHUD: boolean;
-    fullHealth;
+    fullHealth = 100;
     isEnemy: boolean;
+    state: STATE;
+    ammoCount: number;
+    reloadTimer; 
+
+    //
+    fireRate;
+    bulletSpeed;
+    bulletSpread;
+    bulletDamage;
+    fireTimeBuffer;
+    recoilTimer;
     constructor(pos: LJS.Vector2, size?: LJS.Vector2, tileInfo?: LJS.TileInfo, angle?: number, displayHUD?: boolean)
     {
         super(pos, size, tileInfo, angle);
-        this.fullHealth = 100;
         this.health = this.fullHealth;
         this.isGameObject = 1;
+        this.damping = .5;
         this.damageTimer = new LJS.Timer;
-        this.displayHUD = false
+        this.displayHUD = true
         this.isEnemy = false
+        this.state = STATE.IDLE
+        this.ammoCount = 10; 
+        this.reloadTimer = new LJS.Timer;
+
+
+        // weapon settings
+        this.fireRate      = 8;
+        this.bulletSpeed   = vec2(.5);
+        this.bulletSpread  = .1;
+        this.bulletDamage  = 10;
+
+        // prepare to fire
+        this.fireTimeBuffer = this.localAngle = 0;
+        this.recoilTimer = new LJS.Timer;
+        this.displayHUD = true
     }
 
     update()
     {
+
+
         // flash white when damaged
         let brightness = 0;
         if (!this.isDead() && this.damageTimer.isSet())
@@ -69,9 +109,21 @@ export class GameObject extends LJS.EngineObject
             let healthColor = this.isEnemy ? LJS.RED : LJS.GREEN
             LJS.drawRect(this.pos.add(vec2(0 ,base)), vec2(1.05, .2), LJS.BLACK);
             LJS.drawRect(this.pos.add(vec2(-.50 +  (x / 2), base)), vec2(x, .15), healthColor);
+            
+            if (!(this instanceof Player)){
+                base += .25
+                LJS.drawText(`STATE: ${this.state}`, this.pos.add(vec2(0, base)), .25, LJS.WHITE)
+            }
         }
 
         super.render()
+    }
+
+
+    getAngleTowardPos(pos: LJS.Vector2){
+        const direction = pos.subtract(this.pos).normalize();
+        const angle = LJS.atan2(direction.x, direction.y)
+        return angle
     }
 }
 
@@ -79,34 +131,23 @@ export class GameObject extends LJS.EngineObject
 
 export class Player extends GameObject{
     shootTimer;
-    fireRate;
-    bulletSpeed;
-    bulletSpread;
-    bulletDamage;
-    fireTimeBuffer;
-    recoilTimer;
+
 
 
     constructor(pos: LJS.Vector2){
         super(pos,LJS.vec2(1), Game.spriteAtlas.pawn, 0);
-        this.setCollision()
         this.renderOrder = 1
-        this.shootTimer = LJS.Timer
+        this.shootTimer = new LJS.Timer;
+        this.setCollision()
 
 
-        // weapon settings
-        this.fireRate      = 8;
-        this.bulletSpeed   = vec2(.5);
-        this.bulletSpread  = .1;
-        this.bulletDamage  = 10;
-
-        // prepare to fire
-        this.fireTimeBuffer = this.localAngle = 0;
-        this.recoilTimer = new LJS.Timer;
-        this.displayHUD = true
     }
 
     update(): void {
+        this.fireTimeBuffer += LJS.timeDelta;
+        if (!LJS.mouseIsDown(0)){
+            this.fireTimeBuffer = LJS.min(this.fireTimeBuffer, 0);
+        }
         // apply movement controls
         const moveInput = LJS.keyDirection().clampLength(1).scale(.3);
         if (moveInput.length()) {
@@ -115,24 +156,35 @@ export class Player extends GameObject{
             this.velocity = LJS.vec2(0);
         }
 
-        const direction = LJS.mousePos.subtract(this.pos).normalize();
-        const angle = LJS.atan2(direction.x, direction.y)
+        let angle = this.getAngleTowardPos(LJS.mousePos)
         this.angle = angle - Deg2Rad(90)
-
         LJS.setCameraPos(this.pos)
         
         if (LJS.mouseIsDown(0)){
-            this.shoot(angle)
+            
+            if (Game.debugPathFinderWithPlayer){
+                let path = AI.aStarPathFinder(this.pos, LJS.mousePos)
+                for (let node of path){
+                    LJS.debugPoint(node.add(LJS.vec2(.5)), LJS.RED, .1)
+                }
+            }else{
+                this.shoot(angle)
+            }
         }
+
+
+
     }
 
 
-    shoot(angle: number): void { 
-        const direction = LJS.vec2(5*this.getMirrorSign(), 0).setAngle(angle);
-        this.applyForce(LJS.vec2(1).setAngle(angle - Deg2Rad(180)).clampLength(0.1))
-        const velocity = direction.rotate(LJS.rand(-1,1)*this.bulletSpread);
-        
-        new Bullet(this.pos, this, velocity, this.bulletDamage, angle);
+    shoot(angle: number): void {
+
+        for (; this.fireTimeBuffer > 0; this.fireTimeBuffer -= 1/this.fireRate){   
+            const direction = LJS.vec2(5*this.getMirrorSign(), 0).setAngle(angle);
+            this.applyForce(LJS.vec2(1).setAngle(angle - Deg2Rad(180)).clampLength(0.1))
+            const velocity = direction.rotate(LJS.rand(-1,1)*this.bulletSpread);
+            new Bullet(this.pos, this, velocity, this.bulletDamage, angle);
+        }
     }
 
 
@@ -144,26 +196,58 @@ export class Enemy extends GameObject{
     patrolRadius;
     nextPos: LJS.Vector2 | undefined;
     patrolSpeed;
-      constructor(pos: LJS.Vector2, tileInfo: LJS.TileInfo){
-        super(pos, vec2(1), tileInfo )
+    movementDirs;
+    movementTimer;
+    bulletDamage;
+    
+    constructor(pos: LJS.Vector2, tileInfo: LJS.TileInfo){
+        super(pos, vec2(.95), tileInfo )
         this.displayHUD = true
         this.isEnemy = true
         this.setCollision()
         this.renderOrder = 1
-        this.patrolRadius = 5
+        this.patrolRadius = 2
         this.wayPoints = []
         this.patrolSpeed = 0.05
-      }
+        this.movementDirs = AI.directions;
+        this.movementTimer = new LJS.Timer(.50);
+        this.bulletDamage = 5
+        
+    }
+
 
       update(): void {
-        this.patrol()
+
+
+
+        switch(this.state){
+            case STATE.IDLE: 
+                this.state = STATE.PATROL // start patrolling if IDLE
+                break;
+            case STATE.PATROL:
+                this.patrol()
+                const nearbyObjects = LJS.engineObjectsCollect(this.pos, 6)
+                if (nearbyObjects.includes(Game.player)){
+                    this.state = STATE.ATTACK;
+                }
+                break;
+            case STATE.ATTACK:
+                this.seekPlayer()
+                this.fireTimeBuffer += LJS.timeDelta;
+                if( this.canSeePlayer())
+                    this.shoot(this.getAngleTowardPos(Game.player.pos))
+                break;
+                
+        }
+
+        this.velocity.clampLength(1)
       }
 
       patrol(){
-
         if (this.wayPoints.length == 0){
             this.wayPoints = AI.getAvailablePointsNearObjectBFS(this, this.patrolRadius)
         }
+
         if( LJS.debugOverlay){
             for (let item of this.wayPoints){
                 LJS.debugPoint(item, LJS.GREEN, 0.1)
@@ -174,18 +258,83 @@ export class Enemy extends GameObject{
         }
 
         if(this.nextPos){
-            this.applyForce((this.nextPos.subtract(this.pos).normalize(.001)))
+            this.applyForce((this.nextPos.subtract(this.pos).normalize(.02)))
             if (LJS.debugOverlay)
-                LJS.debugPoint(this.nextPos, LJS.RED, 0.01)
+                LJS.debugPoint(this.nextPos, LJS.RED, 0.1)
         }
       }
+
+
+    seekPlayer(){
+        this.wayPoints = AI.aStarPathFinder(this.pos, Game.player.pos, this.movementDirs)
+
+        if(Game.debugEnemyPathFinder){
+            for(let point of this.wayPoints){
+                LJS.debugPoint(point, LJS.RED, 0.1)
+            }
+        }
+        
+        this.nextPos = this.wayPoints.pop()
+        if(this.nextPos && this.movementTimer.elapsed()){
+                
+            this.applyForce((this.nextPos.subtract(this.pos).normalize(1)))
+            
+            if (LJS.debugOverlay)
+                LJS.debugPoint(this.nextPos, LJS.RED, .1)
+
+            this.movementTimer.set(0.25)
+
+        }
+    }
+
+
+    shoot(angle: number): void {
+
+        if(this.ammoCount > 0 && !this.reloadTimer.isSet()){
+            this.ammoCount--; 
+        }
+
+        if(this.ammoCount <= 0){
+            this.reloadTimer.set(0.5)
+            this.ammoCount += 10
+        }
+
+
+        if(!this.reloadTimer.isSet() || this.reloadTimer.elapsed()){
+
+            for (; this.fireTimeBuffer > 0; this.fireTimeBuffer -= 1/this.fireRate)
+                {
+                const direction = LJS.vec2(5*this.getMirrorSign(), 0).setAngle(angle);
+                this.applyForce(LJS.vec2(1).setAngle(angle - Deg2Rad(180)).clampLength(0.1))
+                const velocity = direction;
+                
+                new Bullet(this.pos, this, velocity, this.bulletDamage, angle);
+            }
+
+
+        }
+
+
+    }
+
+
+    canSeePlayer(){
+        let collision = LJS.engineObjectsRaycast(this.pos, Game.player.pos)
+        if (collision.length == 0){
+            return false
+        }
+        return collision.includes(Game.player)
+    }
+
+
 }
 
 
 export class Bishop extends Enemy {
     constructor(pos: LJS.Vector2){
         super(pos, Game.spriteAtlas.bishop)
-
+        this.fullHealth = BISHIP_HEALTH
+        this.health = BISHIP_HEALTH
     }
 
 }
@@ -193,20 +342,27 @@ export class Bishop extends Enemy {
 export class Knight extends Enemy {
     constructor(pos: LJS.Vector2){
         super(pos, Game.spriteAtlas.knight)
+        this.fullHealth = KNIGHT_HEALTH
+        this.health = KNIGHT_HEALTH
+        this.movementDirs = [
+            LJS.vec2(1, 2),
+            LJS.vec2(2, 1),
+            LJS.vec2(-1, 2),
+            LJS.vec2(-2, 1),
+            LJS.vec2(1, -2),
+            LJS.vec2(2, -1),
+            LJS.vec2(-1, -2),
+            LJS.vec2(-2, -1),
+        ] 
+
     }
-
-
-    // update(): void {
-    //     this.patrol()
-
-    //     super.update()
-
-    // }
 }
 
 export class Rook extends Enemy {
     constructor(pos: LJS.Vector2){
         super(pos, Game.spriteAtlas.rook)
+        this.fullHealth = ROOK_HEALTH
+        this.health = ROOK_HEALTH
     }
 }
 
@@ -285,7 +441,7 @@ export class Bullet extends LJS.EngineObject
     
     constructor(pos: LJS.Vector2, attacker: GameObject, velocity: LJS.Vector2, damage: number, angle: number) 
     { 
-        super(pos, vec2());
+        super(pos);
         this.color = LJS.rgb(1,1,0);
         this.velocity = velocity;
         this.attacker = attacker;
@@ -293,8 +449,9 @@ export class Bullet extends LJS.EngineObject
         this.damping = 1;
         this.gravityScale = 0;
         this.renderOrder = 100;
-        this.drawSize = vec2(.1,.3);
-        this.range = 10;
+        this.drawSize = vec2(.15,.15);
+        this.size = vec2(.15,.15);
+        this.range = LJS.rand(7, 10);
         this.setCollision();
     }
 
@@ -331,7 +488,7 @@ export class Bullet extends LJS.EngineObject
         if (o.isGameObject && o != this.attacker)
         {
             o.damage(this.damage, o);
-            o.applyForce(this.velocity.scale(.001));
+            o.applyForce(this.velocity.scale(.1));
         }
 
         this.kill()

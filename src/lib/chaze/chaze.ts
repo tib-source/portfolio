@@ -12,6 +12,8 @@ export const TILE_SIZE = 64
 export const GRID_SIZE = 100;
 export let spriteAtlas: Record<string, LJS.TileInfo>;
 export let player: Player;
+export let debugPathFinderWithPlayer    = false;
+export let debugEnemyPathFinder         = false
 let particleEmitter;
 
 
@@ -69,6 +71,13 @@ export function gameUpdate()
     // called every frame at 60 frames per second
     // handle input and update the game state
     // mouse wheel = zoom
+    if (LJS.keyWasPressed('Digit1')){
+        debugPathFinderWithPlayer   = !debugPathFinderWithPlayer
+    }
+    if (LJS.keyWasPressed('Digit2')){
+        debugEnemyPathFinder        = !debugEnemyPathFinder
+    }
+
     LJS.setCameraScale(LJS.clamp(LJS.cameraScale*(1-LJS.mouseWheel/10), 1, 1e3));
     
 }
