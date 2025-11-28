@@ -1,6 +1,7 @@
 import * as LJS from "littlejsengine";
 import { levelSize } from "./gameLevel";
 import { debugEnemyPathFinder } from "./chaze";
+import { Enemy, GameObject } from "./entities";
 
 
 export const directions = [
@@ -65,9 +66,66 @@ export function getAvailablePointsNearObjectBFS(o: LJS.EngineObject, radius: num
 
 
 
-export function aStarPathFinder(start: LJS.Vector2, goal: LJS.Vector2, givenDirs?: LJS.Vector2[]){
+export function getNearbyAlliesBFS(o: GameObject, radius: number, dirs?: LJS.Vector2[]){
+    let grid = generateGrid(false)
+    let queue: Node[] = []
+    let seen = new Set<Node>();
+    
+    let maxX = o.pos.x + radius
+    let maxY = o.pos.y + radius
+    let minX = o.pos.x - radius
+    let minY = o.pos.y - radius
+    let available = []
+    
+    let startNode = new Node(o.pos.floor())
 
-    let grid = generateGrid()
+    queue.push(startNode)
+
+    while(queue.length > 0){
+        let curr = queue.shift()
+        if (curr){
+            if (debugEnemyPathFinder){
+                LJS.debugPoint(curr.pos, LJS.BLUE, 0.1)
+            }
+            if (seen.has(curr))
+                continue
+
+            seen.add(curr)
+
+
+            if (curr.pos.x >= maxX || curr.pos.y >= maxY || curr.pos.x <= minX || curr.pos.y <= minY) continue;
+
+            const objects = LJS.engineObjectsCollect(curr.pos, LJS.vec2(2));
+            for (let obj of objects){
+                if (obj instanceof Enemy && obj !== o){
+                    available.push(obj)
+                }
+            }
+
+            let neighbors = getNeighbourNodes(curr.pos, grid, dirs)
+            for (let n of neighbors){
+                if (!n){
+                    continue
+                }
+                if (n.walkable && !seen.has(n)){
+                    queue.push(n)
+                    continue
+                }
+
+            }
+
+        }
+
+
+    }
+            
+    return available
+    
+}
+
+
+export function aStarPathFinder(start: LJS.Vector2, goal: LJS.Vector2, givenDirs?: LJS.Vector2[]){
+    let grid = generateGrid(true)
     start = start.floor().add(LJS.vec2(.5))
     goal= goal.floor().add(LJS.vec2(.5))
     let queue = new Set<Node>();
@@ -110,12 +168,18 @@ export function aStarPathFinder(start: LJS.Vector2, goal: LJS.Vector2, givenDirs
 
 
 
-export function generateGrid(){
+export function generateGrid(offset: boolean = true){
     let grid = new Map<string, Node>();
 
     for (let x = levelSize.x; x--;)
     for (let y = levelSize.y; y--;){
-        let pos = LJS.vec2(x,y).add(LJS.vec2(.5))
+        let pos; 
+        if (offset){
+            pos = LJS.vec2(x,y).add(LJS.vec2(0.5))
+        }else{
+            pos = LJS.vec2(x,y)
+        }
+        
         let collision = LJS.tileCollisionTest(pos, LJS.vec2(1))
         let node = new Node(pos)
         if (collision){

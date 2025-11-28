@@ -222,9 +222,10 @@ export class Enemy extends GameObject{
     movementDirs;
     movementTimer;
     bulletDamage;
-    nearbyAllies: GameObject[];
-    movingToAlly: GameObject | undefined;
+    nearbyAllies: Enemy[];
+    movingToAlly: Enemy | undefined;
     haveFled;
+    assisting; 
     constructor(pos: LJS.Vector2, tileInfo: LJS.TileInfo){
         super(pos, vec2(.95), tileInfo )
         this.displayHUD = true
@@ -239,7 +240,8 @@ export class Enemy extends GameObject{
         this.bulletDamage = 5
         this.fireRate = 0.4
         this.nearbyAllies = []
-        this.haveFled = false
+        this.haveFled = false;
+        this.assisting = false; 
     }
 
 
@@ -340,26 +342,18 @@ export class Enemy extends GameObject{
     }
 
     findNearestEnemy(){
-        let radius = 5
-        while(this.nearbyAllies.length == 0){
-            let nearby = LJS.engineObjectsCollect(this.pos, radius).sort((a, b) => a.pos.distance(this.pos) - b.pos.distance(this.pos))
-            let closest = [];
-            for (let object of nearby){
-                if (object instanceof GameObject && object.isEnemy && object.state == STATE.PATROL){
-                    if (closest.length < LJS.rand(1,2))
-                        closest.push(object)
-                }
-            }
-
-            this.nearbyAllies = closest
-
-        radius += 5
+        if (this.nearbyAllies.length == 0){
+            this.nearbyAllies = AI.getNearbyAlliesBFS(this, 15)
         }
     }
 
     alertNearbyAlly(){
         if(this.nearbyAllies?.length == 0){
             const ally = this.findNearestEnemy()
+            if (this.nearbyAllies.length == 0){
+                this.haveFled = true
+                this.state = STATE.ATTACK
+            }
         }else{
             if (!this.movingToAlly){
                 this.movingToAlly = this.nearbyAllies.shift()
@@ -370,16 +364,16 @@ export class Enemy extends GameObject{
             }
             if (!this.movingToAlly){
                 this.state = STATE.ATTACK
+                this.haveFled = true
                 return
             }
 
             this.moveToPosition(this.movingToAlly.pos)
             if (this.movingToAlly.pos.distance(this.pos) < 2){
                 this.movingToAlly.state = STATE.ATTACK
+                this.movingToAlly.assisting = true; 
                 this.movingToAlly = undefined
-                if (this.nearbyAllies.length == 0){
-                    this.state = STATE.ATTACK
-                }
+
             
             }
 
