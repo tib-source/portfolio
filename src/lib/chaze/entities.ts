@@ -8,7 +8,7 @@ import { vec2 } from "littlejsengine";
 const KNIGHT_HEALTH = 250
 const ROOK_HEALTH   = 300;
 const BISHIP_HEALTH = 500;
-
+let ITEM_ID = 0
 enum STATE{
     IDLE="IDLE",
     PATROL="PATROL",
@@ -19,7 +19,7 @@ enum STATE{
 
 export class GameObject extends LJS.EngineObject 
 {
-
+    id: number;
     health: number;
     isGameObject: number;
     damageTimer: LJS.Timer;   
@@ -31,12 +31,14 @@ export class GameObject extends LJS.EngineObject
     reloadTimer; 
 
     //
-    fireRate;
+    shootTimer;
     bulletSpeed;
     bulletSpread;
     bulletDamage;
     fireTimeBuffer;
     recoilTimer;
+    fireRate;
+
     constructor(pos: LJS.Vector2, size?: LJS.Vector2, tileInfo?: LJS.TileInfo, angle?: number, displayHUD?: boolean)
     {
         super(pos, size, tileInfo, angle);
@@ -52,7 +54,8 @@ export class GameObject extends LJS.EngineObject
 
 
         // weapon settings
-        this.fireRate      = 8;
+        this.fireRate      = 0.1;
+        this.shootTimer    = new LJS.Timer;
         this.bulletSpeed   = vec2(.5);
         this.bulletSpread  = .1;
         this.bulletDamage  = 10;
@@ -61,21 +64,17 @@ export class GameObject extends LJS.EngineObject
         this.fireTimeBuffer = this.localAngle = 0;
         this.recoilTimer = new LJS.Timer;
         this.displayHUD = true
+        this.id = ITEM_ID
+        ITEM_ID += 1
     }
 
     update()
     {
 
-
-        // flash white when damaged
-        let brightness = 0;
-        if (!this.isDead() && this.damageTimer.isSet())
-            brightness = .5*LJS.percent(this.damageTimer.get(), .15, 0);
-        this.additiveColor = LJS.hsl(0,0,brightness,0);
-
         // kill if below level
-        if (!this.isDead() && this.pos.y < -9)
+        if (!this.isDead() && this.pos.y < -9){
             this.kill(this);
+        }
     }
 
     damage(damage: number, damagingObject: GameObject)
@@ -86,6 +85,8 @@ export class GameObject extends LJS.EngineObject
         
         // set damage timer;
         this.damageTimer.set();
+
+        
         for (const child of this.children)
             child.damageTimer && child.damageTimer.set();
 
@@ -109,10 +110,14 @@ export class GameObject extends LJS.EngineObject
             let healthColor = this.isEnemy ? LJS.RED : LJS.GREEN
             LJS.drawRect(this.pos.add(vec2(0 ,base)), vec2(1.05, .2), LJS.BLACK);
             LJS.drawRect(this.pos.add(vec2(-.50 +  (x / 2), base)), vec2(x, .15), healthColor);
+
+
+            if (!(this instanceof Player) && Game.debugEnemyInfo){
+
+                LJS.drawText(`STATE: ${this.state}`, this.pos.add(vec2(0, base + 0.25)), .25, LJS.WHITE)
+                LJS.drawText(`AMMO: ${this.ammoCount}`, this.pos.add(vec2(0, base + 0.5)), .25, LJS.WHITE)
+                LJS.drawText(`ID: ${this.getName()}`, this.pos.add(vec2(0, base + 0.75)), .25, LJS.WHITE)
             
-            if (!(this instanceof Player)){
-                base += .25
-                LJS.drawText(`STATE: ${this.state}`, this.pos.add(vec2(0, base)), .25, LJS.WHITE)
             }
         }
 
@@ -125,6 +130,40 @@ export class GameObject extends LJS.EngineObject
         const angle = LJS.atan2(direction.x, direction.y)
         return angle
     }
+
+
+
+    shoot(angle: number): void {
+
+        if(this.ammoCount <= 0 ){
+            this.ammoCount = 10
+        }
+
+        if(this.ammoCount > 0 && this.shootTimer.elapsed() && this.reloadTimer.elapsed()){
+            const direction = LJS.vec2(5*this.getMirrorSign(), 0).setAngle(angle);
+            this.applyForce(LJS.vec2(1).setAngle(angle - Deg2Rad(180)).clampLength(0.1))
+            const velocity = direction.rotate(LJS.rand(-1,1)*this.bulletSpread);
+            new Bullet(this.pos, this, velocity, this.bulletDamage, angle);
+            this.ammoCount = this.ammoCount - 1 
+
+            if (this.ammoCount <= 0 ){
+                this.reloadTimer.set(2)
+            }
+
+        }
+
+        if(this.shootTimer.elapsed()){
+            this.shootTimer.set(this.fireRate)
+        }
+
+    
+    
+    }
+
+
+    getName(){
+        return this.constructor.name + " " + this.id
+    }
 }
 
 
@@ -132,22 +171,18 @@ export class GameObject extends LJS.EngineObject
 export class Player extends GameObject{
     shootTimer;
 
-
-
     constructor(pos: LJS.Vector2){
         super(pos,LJS.vec2(1), Game.spriteAtlas.pawn, 0);
+        this.fullHealth = 100
+        this.health = 100
         this.renderOrder = 1
-        this.shootTimer = new LJS.Timer;
+        this.shootTimer = new LJS.Timer(0.25);
         this.setCollision()
 
 
     }
 
     update(): void {
-        this.fireTimeBuffer += LJS.timeDelta;
-        if (!LJS.mouseIsDown(0)){
-            this.fireTimeBuffer = LJS.min(this.fireTimeBuffer, 0);
-        }
         // apply movement controls
         const moveInput = LJS.keyDirection().clampLength(1).scale(.3);
         if (moveInput.length()) {
@@ -159,9 +194,11 @@ export class Player extends GameObject{
         let angle = this.getAngleTowardPos(LJS.mousePos)
         this.angle = angle - Deg2Rad(90)
         LJS.setCameraPos(this.pos)
-        
+        this.handleShoot(angle)
+    }
+
+    handleShoot(angle: number){
         if (LJS.mouseIsDown(0)){
-            
             if (Game.debugPathFinderWithPlayer){
                 let path = AI.aStarPathFinder(this.pos, LJS.mousePos)
                 for (let node of path){
@@ -170,25 +207,11 @@ export class Player extends GameObject{
             }else{
                 this.shoot(angle)
             }
-        }
-
-
-
-    }
-
-
-    shoot(angle: number): void {
-
-        for (; this.fireTimeBuffer > 0; this.fireTimeBuffer -= 1/this.fireRate){   
-            const direction = LJS.vec2(5*this.getMirrorSign(), 0).setAngle(angle);
-            this.applyForce(LJS.vec2(1).setAngle(angle - Deg2Rad(180)).clampLength(0.1))
-            const velocity = direction.rotate(LJS.rand(-1,1)*this.bulletSpread);
-            new Bullet(this.pos, this, velocity, this.bulletDamage, angle);
+        }else{
+            this.shootTimer.set(0)
+            this.reloadTimer.set(0)
         }
     }
-
-
-
 }
 
 export class Enemy extends GameObject{
@@ -199,7 +222,9 @@ export class Enemy extends GameObject{
     movementDirs;
     movementTimer;
     bulletDamage;
-    
+    nearbyAllies: GameObject[];
+    movingToAlly: GameObject | undefined;
+    haveFled;
     constructor(pos: LJS.Vector2, tileInfo: LJS.TileInfo){
         super(pos, vec2(.95), tileInfo )
         this.displayHUD = true
@@ -212,31 +237,53 @@ export class Enemy extends GameObject{
         this.movementDirs = AI.directions;
         this.movementTimer = new LJS.Timer(.50);
         this.bulletDamage = 5
-        
+        this.fireRate = 0.4
+        this.nearbyAllies = []
+        this.haveFled = false
     }
 
 
       update(): void {
 
 
+        let brightness = 0;
+        if (!this.isDead() && this.damageTimer.isSet()){ // I dont understand 
+            // DONT MOVE FROM THE ENEMY BLOCK, DOESNT WORK IN THE GAME OBJECT 
+            // I DONT KNOW WHY 
+            brightness = .5*LJS.percent(this.damageTimer.get(), .15, 0);
+        }
+        this.additiveColor = LJS.hsl(0,0,brightness,0)
 
         switch(this.state){
             case STATE.IDLE: 
                 this.state = STATE.PATROL // start patrolling if IDLE
                 break;
             case STATE.PATROL:
+                this.wayPoints = []
                 this.patrol()
                 const nearbyObjects = LJS.engineObjectsCollect(this.pos, 6)
                 if (nearbyObjects.includes(Game.player)){
                     this.state = STATE.ATTACK;
                 }
+
+                this.shootTimer.set(0)
+                this.reloadTimer.set(0)
                 break;
             case STATE.ATTACK:
-                this.seekPlayer()
+                this.moveToPosition(Game.player.pos)
                 this.fireTimeBuffer += LJS.timeDelta;
-                if( this.canSeePlayer())
+                if( this.canSeePlayer()){
                     this.shoot(this.getAngleTowardPos(Game.player.pos))
+                }
+
+                if ((this.health < (this.fullHealth * LJS.rand(0.1, 0.35)) && (!this.haveFled))){
+                    this.state = STATE.FLEE
+                }
                 break;
+            case STATE.FLEE:
+                this.alertNearbyAlly()
+                break;
+                
                 
         }
 
@@ -264,9 +311,9 @@ export class Enemy extends GameObject{
         }
       }
 
-
-    seekPlayer(){
-        this.wayPoints = AI.aStarPathFinder(this.pos, Game.player.pos, this.movementDirs)
+    
+    moveToPosition(goal: LJS.Vector2){
+        this.wayPoints = AI.aStarPathFinder(this.pos, goal, this.movementDirs)
 
         if(Game.debugEnemyPathFinder){
             for(let point of this.wayPoints){
@@ -288,44 +335,57 @@ export class Enemy extends GameObject{
     }
 
 
-    shoot(angle: number): void {
+    canSeePlayer(){
+        return LJS.engineObjectsCollect(this.pos, 6).includes(Game.player)
+    }
 
-        if(this.ammoCount > 0 && !this.reloadTimer.isSet()){
-            this.ammoCount--; 
-        }
-
-        if(this.ammoCount <= 0){
-            this.reloadTimer.set(0.5)
-            this.ammoCount += 10
-        }
-
-
-        if(!this.reloadTimer.isSet() || this.reloadTimer.elapsed()){
-
-            for (; this.fireTimeBuffer > 0; this.fireTimeBuffer -= 1/this.fireRate)
-                {
-                const direction = LJS.vec2(5*this.getMirrorSign(), 0).setAngle(angle);
-                this.applyForce(LJS.vec2(1).setAngle(angle - Deg2Rad(180)).clampLength(0.1))
-                const velocity = direction;
-                
-                new Bullet(this.pos, this, velocity, this.bulletDamage, angle);
+    findNearestEnemy(){
+        let radius = 5
+        while(this.nearbyAllies.length == 0){
+            let nearby = LJS.engineObjectsCollect(this.pos, radius).sort((a, b) => a.pos.distance(this.pos) - b.pos.distance(this.pos))
+            let closest = [];
+            for (let object of nearby){
+                if (object instanceof GameObject && object.isEnemy && object.state == STATE.PATROL){
+                    if (closest.length < LJS.rand(1,2))
+                        closest.push(object)
+                }
             }
 
+            this.nearbyAllies = closest
+
+        radius += 5
+        }
+    }
+
+    alertNearbyAlly(){
+        if(this.nearbyAllies?.length == 0){
+            const ally = this.findNearestEnemy()
+        }else{
+            if (!this.movingToAlly){
+                this.movingToAlly = this.nearbyAllies.shift()
+                if (this.nearbyAllies.length == 0){
+                    this.state = STATE.ATTACK
+                    return
+                }
+            }
+            if (!this.movingToAlly){
+                this.state = STATE.ATTACK
+                return
+            }
+
+            this.moveToPosition(this.movingToAlly.pos)
+            if (this.movingToAlly.pos.distance(this.pos) < 2){
+                this.movingToAlly.state = STATE.ATTACK
+                this.movingToAlly = undefined
+                if (this.nearbyAllies.length == 0){
+                    this.state = STATE.ATTACK
+                }
+            
+            }
 
         }
 
-
     }
-
-
-    canSeePlayer(){
-        let collision = LJS.engineObjectsRaycast(this.pos, Game.player.pos)
-        if (collision.length == 0){
-            return false
-        }
-        return collision.includes(Game.player)
-    }
-
 
 }
 
@@ -344,16 +404,16 @@ export class Knight extends Enemy {
         super(pos, Game.spriteAtlas.knight)
         this.fullHealth = KNIGHT_HEALTH
         this.health = KNIGHT_HEALTH
-        this.movementDirs = [
-            LJS.vec2(1, 2),
-            LJS.vec2(2, 1),
-            LJS.vec2(-1, 2),
-            LJS.vec2(-2, 1),
-            LJS.vec2(1, -2),
-            LJS.vec2(2, -1),
-            LJS.vec2(-1, -2),
-            LJS.vec2(-2, -1),
-        ] 
+        // this.movementDirs = [
+        //     LJS.vec2(1, 2),
+        //     LJS.vec2(2, 1),
+        //     LJS.vec2(-1, 2),
+        //     LJS.vec2(-2, 1),
+        //     LJS.vec2(1, -2),
+        //     LJS.vec2(2, -1),
+        //     LJS.vec2(-1, -2),
+        //     LJS.vec2(-2, -1),
+        // ] 
 
     }
 }

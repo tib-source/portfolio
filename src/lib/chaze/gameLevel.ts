@@ -72,7 +72,7 @@ function loadLevelData(level: number){
         new GameObjects.Coin(objectPos)
 
         // replace with empty tile and empty collision
-        mapLayer.clearData(pos);
+        mapLayer.clearData(pos, true);
         mapLayer.clearCollisionData(pos);
         continue;
 
@@ -83,7 +83,7 @@ function loadLevelData(level: number){
         new GameObjects.Potion(objectPos)
 
         // replace with empty tile and empty collision
-        mapLayer.clearData(pos);
+        mapLayer.clearData(pos, true);
         mapLayer.clearCollisionData(pos);
         continue;
 
@@ -102,7 +102,7 @@ function loadLevelData(level: number){
         playerStartPos = objectPos
 
         // replace with empty tile and empty collision
-        mapLayer.clearData(pos);
+        mapLayer.clearData(pos, true);
         mapLayer.clearCollisionData(pos);
         continue;
 
@@ -124,7 +124,7 @@ function loadLevelData(level: number){
       if (tileData == tileLookup.knight){
         new GameObjects.Knight(objectPos)
         // replace with empty tile and empty collision
-        mapLayer.clearData(pos);
+        mapLayer.clearData(pos, true);
         mapLayer.clearCollisionData(pos);
         continue;
 
@@ -141,8 +141,6 @@ function loadLevelData(level: number){
       //   continue;
 
       // }
-
-        mapLayer.redraw();
       
       }
 

@@ -13,7 +13,8 @@ export const GRID_SIZE = 100;
 export let spriteAtlas: Record<string, LJS.TileInfo>;
 export let player: Player;
 export let debugPathFinderWithPlayer    = false;
-export let debugEnemyPathFinder         = false
+export let debugEnemyPathFinder         = false;
+export let debugEnemyInfo               = false;
 let particleEmitter;
 
 
@@ -54,11 +55,12 @@ export function gameInit()
 
     };
 
-    let playerStartPos = GameLevel.buildLevel()
+    let playerStartPos = GameLevel.buildLevel();
     if (!playerStartPos){
         playerStartPos = vec2(0,1)
     }
     player = new Player(playerStartPos);
+
     LJS.setCameraPos(GameLevel.getCameraTarget());
 
 
@@ -77,6 +79,10 @@ export function gameUpdate()
     if (LJS.keyWasPressed('Digit2')){
         debugEnemyPathFinder        = !debugEnemyPathFinder
     }
+    if (LJS.keyWasPressed('Digit3')){
+        debugEnemyInfo              = !debugEnemyInfo
+    }
+    
 
     LJS.setCameraScale(LJS.clamp(LJS.cameraScale*(1-LJS.mouseWheel/10), 1, 1e3));
     
@@ -96,7 +102,6 @@ export function gameRender()
 {
     // called before objects are rendered
     // draw any background effects that appear behind objects
-    GameLevel.generateArena()
 
 }
 
@@ -105,5 +110,14 @@ export function gameRenderPost()
 {
     // called after objects are rendered
     // draw effects or hud that appear above all objects
-    // LJS.drawTextScreen('Hello World!', LJS.mainCanvasSize.scale(.5), 80);
+    LJS.drawTextScreen(`Ammo : ${"⁍ ".repeat(player.ammoCount)}`, vec2(30,30), 20, LJS.WHITE, 1, LJS.WHITE, "left")
+    let x = (player.health/ player.fullHealth )* 240
+    let pos = 
+    // LJS.drawTextScreen("test", pos, 1)
+    LJS.drawRect(vec2(150, 60), vec2(240,30), LJS.BLACK, undefined, undefined, true);
+    LJS.drawRect(vec2(150, 60).add(vec2(-120 +  (x / 2), 0)), vec2(x, 30), LJS.GREEN, undefined, undefined, true);
+
+    // if(player.reloadTimer.isSet()){
+    //     LJS.drawNineSlice(vec2(30,30), vec2(1), spriteAtlas.pawn)
+    // }
 }
