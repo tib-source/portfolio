@@ -3,9 +3,10 @@ import * as LJS from "littlejsengine"
 import { Player } from "$lib/chaze/entities";
 import level1 from "$lib/chaze/map/level1.json";
 import SceneManager from "./sceneManager";
+import { PostProcessPlugin } from "littlejsengine";
+import { tvShader } from "./shaders";
 
 const {vec2, rgb} = LJS;
-
 
 
 export const TILE_SIZE = 64
@@ -17,7 +18,7 @@ export let player: Player;
 export let debugPathFinderWithPlayer    = false;
 export let debugEnemyPathFinder         = false;
 export let debugEnemyInfo               = false;
-let particleEmitter;
+export let gameVolume = LJS.soundVolume + 10
 
 
 export const levels = [
@@ -46,6 +47,7 @@ export function gameInit()
     LJS.setObjectDefaultAngleDamping(.99);
     LJS.setCameraScale(GRID_SIZE/2);
     resize(GAME_WIDTH,GAME_HEIGHT);
+    new PostProcessPlugin(tvShader);
 
     LJS.setCanvasClearColor(LJS.hsl(100,0,0, .5))
     const gameTile = (i: number | LJS.Vector2, size=64)=> LJS.tile(i, size, 0, 0);
@@ -87,9 +89,18 @@ export function gameUpdate()
     if (LJS.keyWasPressed('Digit3')){
         debugEnemyInfo              = !debugEnemyInfo
     }
-    sceneManager.update();
 
-    LJS.setCameraScale(LJS.clamp(LJS.cameraScale*(1-LJS.mouseWheel/10), 1, 1e3));
+    if (LJS.keyWasPressed("Backspace")){
+        sceneManager.changeScene("Main")
+    }
+
+    sceneManager.update();
+    let cameraScaleLimit = 30
+    if(debugEnemyInfo){
+        cameraScaleLimit = 10
+    }
+
+    LJS.setCameraScale(LJS.clamp(LJS.cameraScale*(1-LJS.mouseWheel/10), cameraScaleLimit, 100));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,7 +108,6 @@ export function gameUpdatePost()
 {
     // called after physics and objects are updated
     // setup camera and prepare for render
-    // LJS.setCameraPos(LJS.cameraPos.lerp(GameLevel.getCameraTarget(), LJS.clamp(player.getAliveTime()/2)));
     sceneManager.updatePost()
 
 }
@@ -108,8 +118,6 @@ export function gameRender()
     // called before objects are rendered
     // draw any background effects that appear behind objects
     sceneManager.render()
-
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////

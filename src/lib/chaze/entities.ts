@@ -2,9 +2,10 @@
 import * as LJS from "littlejsengine";
 import * as Game from "$lib/chaze/chaze"
 import * as AI from "$lib/chaze/ai"
+import * as Effects from "$lib/chaze/effects";
 import { vec2 } from "littlejsengine";
 
-const PLAYER_HEALTH = 1000
+const PLAYER_HEALTH = 100
 const KNIGHT_HEALTH = 50
 const ROOK_HEALTH   = 100;
 const BISHIP_HEALTH = 500;
@@ -140,7 +141,10 @@ export class GameObject extends LJS.EngineObject
             this.ammoCount = 10
         }
 
+
+
         if(this.ammoCount > 0 && this.shootTimer.elapsed() && this.reloadTimer.elapsed()){
+            Effects.sound_shoot.play(this.pos, Game.gameVolume)
             const direction = LJS.vec2(5*this.getMirrorSign(), 0).setAngle(angle);
             this.applyForce(LJS.vec2(1).setAngle(angle - Deg2Rad(180)).clampLength(0.1))
             const velocity = direction.rotate(LJS.rand(-1,1)*this.bulletSpread);
@@ -234,9 +238,9 @@ export class Enemy extends GameObject{
         this.isEnemy = true
         this.setCollision()
         this.renderOrder = 1
-        this.patrolRadius = 2
+        this.patrolRadius = 4
         this.wayPoints = []
-        this.patrolSpeed = 0.05
+        this.patrolSpeed = 0.1
         this.movementDirs = AI.directions;
         this.movementTimer = new LJS.Timer(.50);
         this.bulletDamage = 5
@@ -263,10 +267,8 @@ export class Enemy extends GameObject{
 
         switch(this.state){
             case ENEMY_STATE.IDLE: 
-                // this.state = ENEMY_STATE.PATROL
                 break; // do nothing 
             case ENEMY_STATE.PATROL:
-                this.wayPoints = []
                 this.patrol()
                 if( this.canSeePlayer()){
                     this.state = ENEMY_STATE.ATTACK
@@ -289,7 +291,6 @@ export class Enemy extends GameObject{
                 
         }
 
-        this.velocity.clampLength(1)
       }
 
       patrol(){
@@ -297,7 +298,7 @@ export class Enemy extends GameObject{
             this.wayPoints = AI.getAvailablePointsNearObjectBFS(this, this.patrolRadius)
         }
 
-        if( LJS.debugOverlay || Game.debugEnemyPathFinder){
+        if( LJS.debugOverlay){
             for (let item of this.wayPoints){
                 LJS.debugPoint(item, LJS.GREEN, 0.1)
             }
@@ -307,7 +308,7 @@ export class Enemy extends GameObject{
         }
 
         if(this.nextPos){
-            this.applyForce((this.nextPos.subtract(this.pos).normalize(.02)))
+            this.velocity = this.velocity.add(((this.nextPos.subtract(this.pos).normalize(.05))))
             if (LJS.debugOverlay || Game.debugEnemyPathFinder)
                 LJS.debugPoint(this.nextPos, LJS.RED, 0.1)
         }
@@ -340,13 +341,19 @@ export class Enemy extends GameObject{
         if(this.nextPos && this.movementTimer.elapsed()){
                 
             this.applyForce((this.nextPos.subtract(this.pos).normalize(1)))
-            
+            Effects.sound_walk.play(this.pos, Game.gameVolume)
+
             if (LJS.debugOverlay)
                 LJS.debugPoint(this.nextPos, LJS.RED, .1)
 
             this.movementTimer.set(0.25)
 
         }
+    }
+
+    startPatrolling(){
+        this.wayPoints = []
+        this.state = ENEMY_STATE.PATROL
     }
 
 
@@ -395,6 +402,12 @@ export class Enemy extends GameObject{
     damage(damage: number, damagingObject: GameObject){
         this.state = ENEMY_STATE.ATTACK
         return super.damage(damage, damagingObject)
+    }
+
+
+    destroy(): void {
+        Effects.sound_die.play(this.pos, Game.gameVolume)
+        super.destroy()
     }
 
 }
@@ -450,7 +463,19 @@ export class Potion extends LJS.EngineObject{
         super(pos, LJS.vec2(.75), Game.spriteAtlas.potion)
         this.mass = 0;
     }
+    update(){
+            // check if hit someone
+        LJS.engineObjectsCallback(this.pos, this.size, (o: LJS.EngineObject)=>
+        {
+            if (o instanceof GameObject){
+                this.collideWithObject(o)
+            }
 
+        });
+
+        Effects.healEffect(this.pos)
+
+    }
     render(){
         const hoverAmplitude = 0.2;
         const hoverSpeed = 2;
@@ -458,7 +483,18 @@ export class Potion extends LJS.EngineObject{
         const hoverOffset = LJS.sin(t * hoverSpeed) * hoverAmplitude;
         const hoverPos = LJS.vec2(this.pos.x, this.pos.y + hoverOffset);
         LJS.drawTile(hoverPos, this.size, this.tileInfo, this.color);
+        
 
+
+    }
+
+    collideWithObject(object: GameObject): boolean {
+        if (object.health == object.fullHealth) return false
+        object.health = object.fullHealth
+        Effects.sound_score.play(this.pos, Game.gameVolume)
+
+        this.destroy()
+        return true
     }
 }
 
@@ -539,6 +575,7 @@ export class Bullet extends LJS.EngineObject
         {
             if (o instanceof GameObject && o.isGameObject && o != this.attacker){
                 this.collideWithObject(o)
+
             }
 
         });

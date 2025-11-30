@@ -4,6 +4,9 @@ import { debugEnemyPathFinder } from "./chaze";
 import { Enemy, GameObject } from "./entities";
 
 
+let grid: Map<string, Node>;
+
+
 const pathCache = new Map<string, LJS.Vector2[]>();
 
 
@@ -140,7 +143,8 @@ export function getNearbyObjectBFS<T extends GameObject>(o: GameObject, radius: 
 
 
 export function aStarPathFinder(start: LJS.Vector2, goal: LJS.Vector2, givenDirs?: LJS.Vector2[], optimiseForObject?: GameObject){
-    let grid = generateGrid(true)
+    grid = generateGrid(true)
+
     start = start.floor().add(LJS.vec2(.5))
     goal= goal.floor().add(LJS.vec2(.5))
     let queue = new Set<Node>();
@@ -176,10 +180,6 @@ export function aStarPathFinder(start: LJS.Vector2, goal: LJS.Vector2, givenDirs
             let node = grid.get(gridKey(curr.pos.add(dir)))
 
             if (!node) continue
-
-            if(optimiseForObject && optimiseForObject.pos.distance(node?.pos) > optimiseForObject.pos.distance(curr.pos)){
-                    continue
-            }
             
             if (!node || seen.has(node) || !node.walkable || LJS.tileCollisionRaycast(curr.pos, node.pos)) continue
             let tempG = curr.gCost + (node.pos.distance(curr.pos))

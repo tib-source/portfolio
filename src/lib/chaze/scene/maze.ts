@@ -50,7 +50,7 @@ export default class Maze extends Scene{
   render() { }
 
   renderPost() {
-    LJS.drawTextScreen(`Ammo : ${"⁍ ".repeat(player.ammoCount)}`, LJS.vec2(30,30), 20, LJS.WHITE, 1, LJS.WHITE, "left")
+    LJS.engineFontImage.drawTextScreen(`Ammo : ${"⁍ ".repeat(player.ammoCount)}`, LJS.vec2(30,30), 20,false, LJS.WHITE)
     let x = (player.health/ player.fullHealth )* 240
     let pos = 
     // LJS.drawTextScreen("test", pos, 1)
