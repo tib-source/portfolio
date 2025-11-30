@@ -4,12 +4,12 @@ import * as Game from "$lib/chaze/chaze"
 import * as AI from "$lib/chaze/ai"
 import { vec2 } from "littlejsengine";
 
-
-const KNIGHT_HEALTH = 250
-const ROOK_HEALTH   = 300;
+const PLAYER_HEALTH = 1000
+const KNIGHT_HEALTH = 50
+const ROOK_HEALTH   = 100;
 const BISHIP_HEALTH = 500;
 let ITEM_ID = 0
-enum STATE{
+export enum ENEMY_STATE{
     IDLE="IDLE",
     PATROL="PATROL",
     ATTACK="ATTACK",
@@ -26,7 +26,8 @@ export class GameObject extends LJS.EngineObject
     displayHUD: boolean;
     fullHealth = 100;
     isEnemy: boolean;
-    state: STATE;
+    state: ENEMY_STATE;
+    previousState: ENEMY_STATE | undefined;
     ammoCount: number;
     reloadTimer; 
 
@@ -48,7 +49,7 @@ export class GameObject extends LJS.EngineObject
         this.damageTimer = new LJS.Timer;
         this.displayHUD = true
         this.isEnemy = false
-        this.state = STATE.IDLE
+        this.state = ENEMY_STATE.IDLE;
         this.ammoCount = 10; 
         this.reloadTimer = new LJS.Timer;
 
@@ -173,8 +174,8 @@ export class Player extends GameObject{
 
     constructor(pos: LJS.Vector2){
         super(pos,LJS.vec2(1), Game.spriteAtlas.pawn, 0);
-        this.fullHealth = 100
-        this.health = 100
+        this.fullHealth = PLAYER_HEALTH
+        this.health = PLAYER_HEALTH
         this.renderOrder = 1
         this.shootTimer = new LJS.Timer(0.25);
         this.setCollision()
@@ -226,6 +227,7 @@ export class Enemy extends GameObject{
     movingToAlly: Enemy | undefined;
     haveFled;
     assisting; 
+    lastGoal: LJS.Vector2 | undefined; 
     constructor(pos: LJS.Vector2, tileInfo: LJS.TileInfo){
         super(pos, vec2(.95), tileInfo )
         this.displayHUD = true
@@ -241,7 +243,10 @@ export class Enemy extends GameObject{
         this.fireRate = 0.4
         this.nearbyAllies = []
         this.haveFled = false;
-        this.assisting = false; 
+        this.assisting = false;
+        this.state = ENEMY_STATE.PATROL; 
+        this.shootTimer = new LJS.Timer(0)
+        this.reloadTimer= new LJS.Timer(0)
     }
 
 
@@ -257,32 +262,27 @@ export class Enemy extends GameObject{
         this.additiveColor = LJS.hsl(0,0,brightness,0)
 
         switch(this.state){
-            case STATE.IDLE: 
-                this.state = STATE.PATROL // start patrolling if IDLE
-                break;
-            case STATE.PATROL:
+            case ENEMY_STATE.IDLE: 
+                // this.state = ENEMY_STATE.PATROL
+                break; // do nothing 
+            case ENEMY_STATE.PATROL:
                 this.wayPoints = []
                 this.patrol()
-                const nearbyObjects = LJS.engineObjectsCollect(this.pos, 6)
-                if (nearbyObjects.includes(Game.player)){
-                    this.state = STATE.ATTACK;
-                }
-
-                this.shootTimer.set(0)
-                this.reloadTimer.set(0)
-                break;
-            case STATE.ATTACK:
-                this.moveToPosition(Game.player.pos)
-                this.fireTimeBuffer += LJS.timeDelta;
                 if( this.canSeePlayer()){
-                    this.shoot(this.getAngleTowardPos(Game.player.pos))
-                }
-
-                if ((this.health < (this.fullHealth * LJS.rand(0.1, 0.35)) && (!this.haveFled))){
-                    this.state = STATE.FLEE
+                    this.state = ENEMY_STATE.ATTACK
                 }
                 break;
-            case STATE.FLEE:
+            case ENEMY_STATE.ATTACK:
+                this.fireTimeBuffer += LJS.timeDelta;
+                this.moveToPosition(Game.player.pos)
+                if( this.canSeePlayer()){
+                    this.playerSeeBehaviour()
+                }
+                if (((this.fullHealth * LJS.rand(0.1, 0.35)) && (!this.haveFled))){
+                    this.state = ENEMY_STATE.FLEE
+                }
+                break;
+            case ENEMY_STATE.FLEE:
                 this.alertNearbyAlly()
                 break;
                 
@@ -297,7 +297,7 @@ export class Enemy extends GameObject{
             this.wayPoints = AI.getAvailablePointsNearObjectBFS(this, this.patrolRadius)
         }
 
-        if( LJS.debugOverlay){
+        if( LJS.debugOverlay || Game.debugEnemyPathFinder){
             for (let item of this.wayPoints){
                 LJS.debugPoint(item, LJS.GREEN, 0.1)
             }
@@ -308,14 +308,27 @@ export class Enemy extends GameObject{
 
         if(this.nextPos){
             this.applyForce((this.nextPos.subtract(this.pos).normalize(.02)))
-            if (LJS.debugOverlay)
+            if (LJS.debugOverlay || Game.debugEnemyPathFinder)
                 LJS.debugPoint(this.nextPos, LJS.RED, 0.1)
         }
       }
 
-    
+    playerSeeBehaviour(){
+        this.shoot(this.getAngleTowardPos(Game.player.pos))
+        this.moveToPosition(Game.player.pos)
+
+    }
+
+
     moveToPosition(goal: LJS.Vector2){
-        this.wayPoints = AI.aStarPathFinder(this.pos, goal, this.movementDirs)
+
+        const goalChanged = !this.lastGoal || !(goal.distance(this.lastGoal) > 2)
+        const noPath = !this.wayPoints || this.wayPoints.length === 0;
+
+        if (goalChanged || noPath) {
+            this.wayPoints = AI.aStarPathFinder(this.pos, goal, this.movementDirs)
+            this.lastGoal = goal.copy()
+        }
 
         if(Game.debugEnemyPathFinder){
             for(let point of this.wayPoints){
@@ -338,12 +351,14 @@ export class Enemy extends GameObject{
 
 
     canSeePlayer(){
-        return LJS.engineObjectsCollect(this.pos, 6).includes(Game.player)
+        if (Game.player.pos.distance(this.pos) < 10)
+            return AI.getNearbyObjectBFS(this, 6, Player, undefined, Game.player).length > 0
+        return false
     }
 
     findNearestEnemy(){
         if (this.nearbyAllies.length == 0){
-            this.nearbyAllies = AI.getNearbyAlliesBFS(this, 15)
+            this.nearbyAllies = AI.getNearbyObjectBFS(this, 6, Enemy)
         }
     }
 
@@ -352,33 +367,34 @@ export class Enemy extends GameObject{
             const ally = this.findNearestEnemy()
             if (this.nearbyAllies.length == 0){
                 this.haveFled = true
-                this.state = STATE.ATTACK
+                this.state = ENEMY_STATE.ATTACK  
             }
         }else{
             if (!this.movingToAlly){
                 this.movingToAlly = this.nearbyAllies.shift()
-                if (this.nearbyAllies.length == 0){
-                    this.state = STATE.ATTACK
+                if (this.nearbyAllies.length == 0 || !this.movingToAlly){
+                    this.state = ENEMY_STATE.ATTACK
+                    this.haveFled = true
                     return
                 }
-            }
-            if (!this.movingToAlly){
-                this.state = STATE.ATTACK
-                this.haveFled = true
-                return
+
             }
 
             this.moveToPosition(this.movingToAlly.pos)
             if (this.movingToAlly.pos.distance(this.pos) < 2){
-                this.movingToAlly.state = STATE.ATTACK
+                this.movingToAlly.state = ENEMY_STATE.ATTACK
                 this.movingToAlly.assisting = true; 
                 this.movingToAlly = undefined
-
-            
             }
 
         }
 
+    }
+
+
+    damage(damage: number, damagingObject: GameObject){
+        this.state = ENEMY_STATE.ATTACK
+        return super.damage(damage, damagingObject)
     }
 
 }
@@ -408,7 +424,14 @@ export class Knight extends Enemy {
         //     LJS.vec2(-1, -2),
         //     LJS.vec2(-2, -1),
         // ] 
+    }
 
+    playerSeeBehaviour(): void {
+        if (!this.assisting && !this.haveFled){
+            this.state = ENEMY_STATE.FLEE
+            return
+        }
+        super.playerSeeBehaviour()
     }
 }
 

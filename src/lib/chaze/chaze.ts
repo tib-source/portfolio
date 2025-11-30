@@ -1,8 +1,8 @@
 'use strict';
 import * as LJS from "littlejsengine"
 import { Player } from "$lib/chaze/entities";
-import * as GameLevel from "$lib/chaze/gameLevel";
 import level1 from "$lib/chaze/map/level1.json";
+import SceneManager from "./sceneManager";
 
 const {vec2, rgb} = LJS;
 
@@ -10,6 +10,8 @@ const {vec2, rgb} = LJS;
 
 export const TILE_SIZE = 64
 export const GRID_SIZE = 100;
+export const GAME_WIDTH = 1280;
+export const GAME_HEIGHT = 720;
 export let spriteAtlas: Record<string, LJS.TileInfo>;
 export let player: Player;
 export let debugPathFinderWithPlayer    = false;
@@ -19,8 +21,21 @@ let particleEmitter;
 
 
 export const levels = [
-    level1
+    level1,
 ]
+
+
+let sceneManager = new SceneManager()
+
+export function spawnNewPlayer(pos: LJS.Vector2){
+    player = new Player(pos);
+}
+
+
+export default function resize(w: number, h: number) {
+    LJS.setCanvasMaxSize(vec2(w, h));
+    LJS.setCanvasFixedSize(vec2(w, h));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 export function gameInit()
@@ -30,11 +45,9 @@ export function gameInit()
     LJS.setObjectDefaultDamping(.99);
     LJS.setObjectDefaultAngleDamping(.99);
     LJS.setCameraScale(GRID_SIZE/2);
-    LJS.setTileDefaultBleed(.5);
-    LJS.setCanvasMaxSize(vec2(3840, 2160));
+    resize(GAME_WIDTH,GAME_HEIGHT);
 
-    // create a table of all sprites
-    LJS.setCanvasClearColor(LJS.hsl(.3,.2,.6))
+    LJS.setCanvasClearColor(LJS.hsl(100,0,0, .5))
     const gameTile = (i: number | LJS.Vector2, size=64)=> LJS.tile(i, size, 0, 0);
     
     spriteAtlas =
@@ -55,15 +68,7 @@ export function gameInit()
 
     };
 
-    let playerStartPos = GameLevel.buildLevel();
-    if (!playerStartPos){
-        playerStartPos = vec2(0,1)
-    }
-    player = new Player(playerStartPos);
-
-    LJS.setCameraPos(GameLevel.getCameraTarget());
-
-
+    sceneManager.changeScene("Main")
 
 }
 
@@ -82,10 +87,9 @@ export function gameUpdate()
     if (LJS.keyWasPressed('Digit3')){
         debugEnemyInfo              = !debugEnemyInfo
     }
-    
+    sceneManager.update();
 
     LJS.setCameraScale(LJS.clamp(LJS.cameraScale*(1-LJS.mouseWheel/10), 1, 1e3));
-    
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -94,6 +98,7 @@ export function gameUpdatePost()
     // called after physics and objects are updated
     // setup camera and prepare for render
     // LJS.setCameraPos(LJS.cameraPos.lerp(GameLevel.getCameraTarget(), LJS.clamp(player.getAliveTime()/2)));
+    sceneManager.updatePost()
 
 }
 
@@ -102,6 +107,8 @@ export function gameRender()
 {
     // called before objects are rendered
     // draw any background effects that appear behind objects
+    sceneManager.render()
+
 
 }
 
@@ -110,14 +117,5 @@ export function gameRenderPost()
 {
     // called after objects are rendered
     // draw effects or hud that appear above all objects
-    LJS.drawTextScreen(`Ammo : ${"⁍ ".repeat(player.ammoCount)}`, vec2(30,30), 20, LJS.WHITE, 1, LJS.WHITE, "left")
-    let x = (player.health/ player.fullHealth )* 240
-    let pos = 
-    // LJS.drawTextScreen("test", pos, 1)
-    LJS.drawRect(vec2(150, 60), vec2(240,30), LJS.BLACK, undefined, undefined, true);
-    LJS.drawRect(vec2(150, 60).add(vec2(-120 +  (x / 2), 0)), vec2(x, 30), LJS.GREEN, undefined, undefined, true);
-
-    // if(player.reloadTimer.isSet()){
-    //     LJS.drawNineSlice(vec2(30,30), vec2(1), spriteAtlas.pawn)
-    // }
+    sceneManager.renderPost()
 }

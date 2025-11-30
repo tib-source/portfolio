@@ -12,25 +12,20 @@ export let tileLookup: any;
 
 
 const walls = [];
-export function generateArena() {
-  // for (let x = 0; x < Game.GRID_SIZE; x++) {
-  //   for (let y = 0; y < Game.GRID_SIZE; y++) {
-  //     LJS.drawTile(LJS.vec2(x, y), LJS.vec2(1), Game.spriteAtlas.floor); // tile index 1 = floor
-  //   }
-  // }
-
-}
 
 export function buildLevel() { 
-  // LJS.engineObjectsDestroy();
+  LJS.engineObjectsDestroy();
   return loadLevelData(0);
 }
 
 
 function loadLevelData(level: number){
   let playerStartPos;
+  if(level == 1){
+    // return perlinGenerateMap();
+  }
   const currLevel = Game.levels[level]
-  // console.log(currLevel )
+
   const mapLayers = LJS.tileLayersLoad(currLevel, LJS.tile(0,64,0),0, 1);
   levelSize = mapLayers[0].size;
   let foregroundTileLayer = mapLayers[0]
@@ -70,8 +65,6 @@ function loadLevelData(level: number){
 
       if (tileData == tileLookup.coin){
         new GameObjects.Coin(objectPos)
-
-        // replace with empty tile and empty collision
         mapLayer.clearData(pos, true);
         mapLayer.clearCollisionData(pos);
         continue;
@@ -81,8 +74,6 @@ function loadLevelData(level: number){
 
       if (tileData == tileLookup.potion){
         new GameObjects.Potion(objectPos)
-
-        // replace with empty tile and empty collision
         mapLayer.clearData(pos, true);
         mapLayer.clearCollisionData(pos);
         continue;
@@ -100,8 +91,6 @@ function loadLevelData(level: number){
 
       if (tileData == tileLookup.pawn){
         playerStartPos = objectPos
-
-        // replace with empty tile and empty collision
         mapLayer.clearData(pos, true);
         mapLayer.clearCollisionData(pos);
         continue;
@@ -109,21 +98,14 @@ function loadLevelData(level: number){
 
       }
 
-      // if (tileData == tileLookup.rook){
-      //   new GameObjects.Rook(objectPos)
-      //   node.walkable = false 
-      //   // replace with empty tile and empty collision
-      //   mapLayer.clearData(pos);
-      //   mapLayer.clearCollisionData(pos);
-          // Gird.set(gridKey(pos), node)
-
-      //   continue;
-
-      // }
+      if (tileData == tileLookup.rook){
+        new GameObjects.Rook(objectPos)
+        mapLayer.clearData(pos, true);
+        mapLayer.clearCollisionData(pos);
+      }
 
       if (tileData == tileLookup.knight){
         new GameObjects.Knight(objectPos)
-        // replace with empty tile and empty collision
         mapLayer.clearData(pos, true);
         mapLayer.clearCollisionData(pos);
         continue;
@@ -132,15 +114,13 @@ function loadLevelData(level: number){
 
 
 
-      // if (tileData == tileLookup.bishop){
-      //   new GameObjects.Bishop(objectPos)
-      //   node.walkable = false 
-      //   // replace with empty tile and empty collision
-      //   mapLayer.clearData(pos);
-      //   mapLayer.clearCollisionData(pos);
-      //   continue;
+      if (tileData == tileLookup.bishop){
+        new GameObjects.Bishop(objectPos)
+        mapLayer.clearData(pos, true);
+        mapLayer.clearCollisionData(pos);
+        continue;
 
-      // }
+      }
       
       }
 
@@ -150,18 +130,6 @@ function loadLevelData(level: number){
 
 }
 
-export function drawWalls(){
-
-  // for (let x = 0; x < Game.GRID_SIZE; x++) {
-  //   for (let y = 0; y < Game.GRID_SIZE; y++) {
-  //     if (x == 0 || y == 0 || x == Game.GRID_SIZE-1 || y == Game.GRID_SIZE-1) {
-  //       let wall = new LJS.EngineObject(LJS.vec2(x, y), LJS.vec2(1), Game.spriteAtlas.wall);
-  //       wall.setCollision();
-  //       wall.mass = 0
-  //     }
-  //   }
-  // }
-}
 
 export function getCameraTarget()
 {
@@ -169,3 +137,57 @@ export function getCameraTarget()
     const offset = 100/LJS.cameraScale*LJS.percent(LJS.mainCanvasSize.y, 300, 600);
     return Game.player.pos.add(LJS.vec2(0, offset));
 }
+
+
+// function perlinGenerateGrid(){
+//   let grid = [];
+//   const nodes = 4;
+
+//   for (let i = 0; i < nodes; i++) {
+//     let row = [];
+//     for (let j = 0; j < nodes; j++) {
+//         row.push(random_unit_vector());
+//     }
+//     grid.push(row);
+//   }
+
+//   return grid
+// }
+
+
+// function perlin_get(x, y) {
+
+//     let grid = perlinGenerateGrid() 
+
+//     let x0 = Math.floor(x);
+//     let x1 = x0 + 1;
+//     let y0 = Math.floor(y);
+//     let y1 = y0 + 1;
+
+//     let dot = dot_prod_grid(x0, y0, x1, y1, grid)
+
+//     return intensity;
+// }
+
+// function random_unit_vector(){
+//     let theta = Math.random() * 2 * Math.PI;
+//     return LJS.vec2(Math.cos(theta), Math.sin(theta))
+// }
+
+// function dot_prod_grid(x: number, y: number, vert_x: number, vert_y: number, grid: LJS.Vector2[][]){
+//     var g_vect = grid[vert_y][vert_x];
+//     var d_vect = {x: x - vert_x, y: y - vert_y};
+//     return d_vect.x * g_vect.x + d_vect.y * g_vect.y;
+// }
+
+// function lin_interp(x, a, b){
+//     return a + x * (b-a);
+// }
+
+
+// smootherstep: function(x){
+//     return 6*x**5 - 15*x**4 + 10*x**3;
+// },
+// interp: function(x, a, b){
+//     return a + smootherstep(x) * (b-a);
+// },

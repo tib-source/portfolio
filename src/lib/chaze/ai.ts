@@ -4,6 +4,9 @@ import { debugEnemyPathFinder } from "./chaze";
 import { Enemy, GameObject } from "./entities";
 
 
+const pathCache = new Map<string, LJS.Vector2[]>();
+
+
 export const directions = [
         LJS.vec2(1, 0),
         LJS.vec2(0, 1),
@@ -15,6 +18,15 @@ export const directions = [
         LJS.vec2(0 , -1)
     ]
 
+
+const walkCache = new Map<LJS.Vector2, boolean>();
+function isWalkable(o: GameObject, pos: LJS.Vector2) {
+    if (walkCache.has(pos)) return walkCache.get(pos);
+
+    const hit = LJS.tileCollisionTest(pos, LJS.vec2(1), o) 
+    walkCache.set(pos, hit == undefined);
+    return hit;
+}
 
 
 export function pickRandomPoints<T>(positions: T[]) {
@@ -66,10 +78,9 @@ export function getAvailablePointsNearObjectBFS(o: LJS.EngineObject, radius: num
 
 
 
-export function getNearbyAlliesBFS(o: GameObject, radius: number, dirs?: LJS.Vector2[]){
-    let grid = generateGrid(false)
-    let queue: Node[] = []
-    let seen = new Set<Node>();
+export function getNearbyObjectBFS<T extends GameObject>(o: GameObject, radius: number, ObjectType: new (...args: any[]) => T, dirs?: LJS.Vector2[], optimiseForObject?: GameObject){
+    let queue: LJS.Vector2[] = []
+    let seen = new Set<string>();
     
     let maxX = o.pos.x + radius
     let maxY = o.pos.y + radius
@@ -77,7 +88,7 @@ export function getNearbyAlliesBFS(o: GameObject, radius: number, dirs?: LJS.Vec
     let minY = o.pos.y - radius
     let available = []
     
-    let startNode = new Node(o.pos.floor())
+    let startNode = o.pos.floor()
 
     queue.push(startNode)
 
@@ -85,33 +96,37 @@ export function getNearbyAlliesBFS(o: GameObject, radius: number, dirs?: LJS.Vec
         let curr = queue.shift()
         if (curr){
             if (debugEnemyPathFinder){
-                LJS.debugPoint(curr.pos, LJS.BLUE, 0.1)
+                LJS.debugPoint(curr, LJS.BLUE, 0.1)
             }
-            if (seen.has(curr))
+            if (seen.has(gridKey(curr)))
                 continue
 
-            seen.add(curr)
+            seen.add(gridKey(curr))
 
 
-            if (curr.pos.x >= maxX || curr.pos.y >= maxY || curr.pos.x <= minX || curr.pos.y <= minY) continue;
+            if (curr.x >= maxX || curr.y >= maxY || curr.x <= minX || curr.y <= minY) continue;
 
-            const objects = LJS.engineObjectsCollect(curr.pos, LJS.vec2(2));
+            const objects = LJS.engineObjectsCollect(curr, LJS.vec2(2));
             for (let obj of objects){
-                if (obj instanceof Enemy && obj !== o){
+                if (obj instanceof ObjectType  && obj !== o){
                     available.push(obj)
                 }
             }
 
-            let neighbors = getNeighbourNodes(curr.pos, grid, dirs)
+            let neighbors = getNeighbourVectors(curr)
             for (let n of neighbors){
-                if (!n){
-                    continue
-                }
-                if (n.walkable && !seen.has(n)){
-                    queue.push(n)
+
+                if(optimiseForObject && optimiseForObject.pos.distance(n) > optimiseForObject.pos.distance(curr)){
                     continue
                 }
 
+                if (!n){
+                    continue
+                }
+                if (!isWalkable(o, n) && !seen.has(gridKey(n))){
+                    queue.push(n)
+                    continue
+                }
             }
 
         }
@@ -124,7 +139,7 @@ export function getNearbyAlliesBFS(o: GameObject, radius: number, dirs?: LJS.Vec
 }
 
 
-export function aStarPathFinder(start: LJS.Vector2, goal: LJS.Vector2, givenDirs?: LJS.Vector2[]){
+export function aStarPathFinder(start: LJS.Vector2, goal: LJS.Vector2, givenDirs?: LJS.Vector2[], optimiseForObject?: GameObject){
     let grid = generateGrid(true)
     start = start.floor().add(LJS.vec2(.5))
     goal= goal.floor().add(LJS.vec2(.5))
@@ -134,20 +149,37 @@ export function aStarPathFinder(start: LJS.Vector2, goal: LJS.Vector2, givenDirs
     let startNode = new Node(start)
     startNode.gCost = 0
 
+    const key = `${start.x},${start.y}-${goal.x},${goal.y}`;
+
+    // ---- CACHE LOOKUP ----
+    if (pathCache.has(key)) {
+        // Return a COPY so the caller can pop() without destroying cached path
+        return [...pathCache.get(key)!];
+    }
+
+
     queue.add(startNode)
     while(queue.size > 0){
         
         let curr = getLowestFCostNode(queue)
         if (curr?.pos.distance(goal) == 0){
-            return getPathFromNode(curr) 
+            let path =  getPathFromNode(curr) 
+            pathCache.set(key, path)
+            return [...path]
         }
 
         queue.delete(curr)
         seen.add(curr)
 
-        let neighbors = getNeighbourNodes(curr.pos, grid, givenDirs)
+        let dirs = givenDirs || directions 
+        for (let dir of dirs){
+            let node = grid.get(gridKey(curr.pos.add(dir)))
 
-        for (let node of neighbors){
+            if (!node) continue
+
+            if(optimiseForObject && optimiseForObject.pos.distance(node?.pos) > optimiseForObject.pos.distance(curr.pos)){
+                    continue
+            }
             
             if (!node || seen.has(node) || !node.walkable || LJS.tileCollisionRaycast(curr.pos, node.pos)) continue
             let tempG = curr.gCost + (node.pos.distance(curr.pos))
@@ -162,10 +194,14 @@ export function aStarPathFinder(start: LJS.Vector2, goal: LJS.Vector2, givenDirs
         }
 
     }
-
+    pathCache.set(key, [])
     return []
 }
 
+
+export function invalidatePathCache() {
+    pathCache.clear();
+}
 
 
 export function generateGrid(offset: boolean = true){
