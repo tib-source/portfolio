@@ -3,7 +3,10 @@
 import * as LJS from "littlejsengine"; 
 import * as GameObjects from "$lib/chaze/entities";
 import * as Game from "$lib/chaze/chaze"
-import { hsl } from "littlejsengine";
+import PerlinNoise from "./perlin";
+import { GRID_SIZE } from "$lib/chaze/chaze";
+import { getAvailablePointsNearObjectBFS, gridKey, pickRandomPoints } from "./ai";
+import { GameObject, type Enemy } from "$lib/chaze/entities";
 
 export let mapLayers: Array<LJS.TileCollisionLayer>;
 export let levelSize: LJS.Vector2;
@@ -19,19 +22,15 @@ export function buildLevel() {
 }
 
 
-function loadLevelData(level: number){
-  let playerStartPos;
-  if(level == 1){
-    // return perlinGenerateMap();
-  }
-  const currLevel = Game.levels[level]
+export function generateMap(){
+  LJS.engineObjectsDestroy();
+  proceduralMap()
+  return findCenterSpawn(20);
 
-  const mapLayers = LJS.tileLayersLoad(currLevel, LJS.tile(0,64,0),0, 1);
-  levelSize = mapLayers[0].size;
-  let foregroundTileLayer = mapLayers[0]
+}
 
 
-  const tileLookup = {
+tileLookup = {
     rook: 0,
     pawn: 1, 
     knight: 2,
@@ -42,9 +41,20 @@ function loadLevelData(level: number){
 
     wall: 32,
     floor: 33
+}
 
 
-  }
+function loadLevelData(level: number){
+  let playerStartPos;
+
+  const currLevel = Game.levels[level]
+
+  const mapLayers = LJS.tileLayersLoad(currLevel, LJS.tile(0,64,0),0, 1);
+  levelSize = mapLayers[0].size;
+  let foregroundTileLayer = mapLayers[0]
+
+
+
 
 
   for (let i = mapLayers.length -1 ; i > -1 ; i--){
@@ -125,9 +135,7 @@ function loadLevelData(level: number){
       }
 
   }
-
   return playerStartPos;
-
 }
 
 
@@ -138,56 +146,126 @@ export function getCameraTarget()
     return Game.player.pos.add(LJS.vec2(0, offset));
 }
 
+function proceduralMap() {
 
-// function perlinGenerateGrid(){
-//   let grid = [];
-//   const nodes = 4;
+  const GRID = Game.GRID_SIZE;               // your tile grid size
+  const perlin = new PerlinNoise();
+  const SCALE = .125;                        // adjust for smoothness
+  const WALL_THRESHOLD = 0.45;               // lower = more walls, higher = more open
+  const tileLayer = new LJS.TileCollisionLayer(LJS.vec2(0), LJS.vec2(GRID, GRID));
 
-//   for (let i = 0; i < nodes; i++) {
-//     let row = [];
-//     for (let j = 0; j < nodes; j++) {
-//         row.push(random_unit_vector());
-//     }
-//     grid.push(row);
-//   }
+  let playerStartPos = LJS.vec2(1, GRID - 2);
 
-//   return grid
-// }
+    for (let x = GRID; x--;)
+    for (let y = GRID; y--;){
 
 
-// function perlin_get(x, y) {
+      let pos = LJS.vec2(x, y).add(LJS.vec2(0.5));
+      const v = perlin.get(x * SCALE, y * SCALE);  
+      let n = LJS.vec2(v).normalize().x
 
-//     let grid = perlinGenerateGrid() 
+      let tile = isEdge(x, y, GRID) ? Game.spriteAtlas.wall :  (n > WALL_THRESHOLD)
+        ? Game.spriteAtlas.wall :  Game.spriteAtlas.floor
 
-//     let x0 = Math.floor(x);
-//     let x1 = x0 + 1;
-//     let y0 = Math.floor(y);
-//     let y1 = y0 + 1;
+      // LJS.drawTile(pos, LJS.vec2(1), tile)
+      tileLayer.drawTile(pos, LJS.vec2(1), tile)
 
-//     let dot = dot_prod_grid(x0, y0, x1, y1, grid)
-
-//     return intensity;
-// }
-
-// function random_unit_vector(){
-//     let theta = Math.random() * 2 * Math.PI;
-//     return LJS.vec2(Math.cos(theta), Math.sin(theta))
-// }
-
-// function dot_prod_grid(x: number, y: number, vert_x: number, vert_y: number, grid: LJS.Vector2[][]){
-//     var g_vect = grid[vert_y][vert_x];
-//     var d_vect = {x: x - vert_x, y: y - vert_y};
-//     return d_vect.x * g_vect.x + d_vect.y * g_vect.y;
-// }
-
-// function lin_interp(x, a, b){
-//     return a + x * (b-a);
-// }
+      // collision
+      if (tile === Game.spriteAtlas.wall) {
+          tileLayer.setCollisionData(LJS.vec2(x, y), 1);
+      }
+    }
 
 
-// smootherstep: function(x){
-//     return 6*x**5 - 15*x**4 + 10*x**3;
-// },
-// interp: function(x, a, b){
-//     return a + smootherstep(x) * (b-a);
-// },
+  // put the layer into your mapLayers array format
+  mapLayers = [tileLayer];
+  foregroundTileLayer = tileLayer;
+  levelSize = tileLayer.size;
+
+  return playerStartPos;
+}
+
+
+
+function isEdge(x: number, y: number, grid: number) {
+  return (
+    x === 0 ||
+    y === 0 ||
+    x === grid - 1 ||
+    y === grid - 1
+  );
+}
+
+
+export function findCenterSpawn(radius = 20) {
+
+    const centerPos = LJS.vec2(levelSize.x / 2, levelSize.y / 2);
+    
+    const centerObj = new LJS.EngineObject(centerPos, LJS.vec2(4));
+
+    const available = getAvailablePointsNearObjectBFS(centerObj, radius);
+    centerObj.destroy()
+    if (available.length === 0) {
+        return centerPos.add(LJS.vec2(.5));
+    }
+
+    const chosen = pickRandomPoints(available);
+    
+    return chosen.add(LJS.vec2(.5));
+}
+
+
+
+
+export function spawnEnemies(player: GameObject, numEnemies = 6, numCollectables = 6, minDistance = 6, maxDistance = 12) {
+    let availableTiles = getAvailablePointsNearObjectBFS(player, maxDistance);
+
+    availableTiles = availableTiles.filter(tile => {
+        const d = tile.distance(player.pos);
+        return d >= minDistance && d <= maxDistance;
+    });
+
+    availableTiles.sort(() => Math.random() - 0.5);
+
+    const spawnedEnemies: Enemy[] = [];
+
+    for (let i = 0; i < numEnemies && availableTiles.length > 0; i++) {
+        const pos = pickRandomPoints(availableTiles);
+
+        const enemyClasses = [
+            GameObjects.Bishop,
+            // GameObjects.Knight,
+            // GameObjects.Rook
+        ];
+
+
+
+        const enemyType = pickRandomPoints(enemyClasses);
+        const enemy = new enemyType(pos)
+        // enemy.state = GameObjects.ENEMY_STATE.ATTACK
+        spawnedEnemies.push(enemy);
+        availableTiles.splice(availableTiles.indexOf(pos), 1);
+    }
+
+
+    for (let i = 0; i < numCollectables && availableTiles.length > 0; i++) {
+        const pos = pickRandomPoints(availableTiles);
+
+        const collectables = [
+            GameObjects.Potion,
+            GameObjects.Coin,
+            GameObjects.Speed,
+            GameObjects.Ammo,
+            GameObjects.Shield,
+            GameObjects.Poison
+        ];
+
+
+
+        const collectable = pickRandomPoints(collectables);
+        const enemy = new collectable(pos)
+        availableTiles.splice(availableTiles.indexOf(pos), 1);
+    }
+
+    return spawnedEnemies;
+}

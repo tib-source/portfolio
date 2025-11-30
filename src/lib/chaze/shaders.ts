@@ -21,7 +21,7 @@ void mainImage(out vec4 c, vec2 p)
 
     // scan lines
     const float scanlineScale = 2.;
-    const float scanlineAlpha = 0.1;
+    const float scanlineAlpha = .1;
     c *= 1. - scanlineAlpha*cos(p.y*2.*iResolution.y/scanlineScale);
 
     {

@@ -3,22 +3,21 @@ import * as LJS from "littlejsengine"
 import { Player } from "$lib/chaze/entities";
 import level1 from "$lib/chaze/map/level1.json";
 import SceneManager from "./sceneManager";
-import { PostProcessPlugin } from "littlejsengine";
+import { PostProcessPlugin, setCanvasPixelated } from "littlejsengine";
 import { tvShader } from "./shaders";
 
-const {vec2, rgb} = LJS;
 
 
-export const TILE_SIZE = 64
-export const GRID_SIZE = 100;
-export const GAME_WIDTH = 1280;
-export const GAME_HEIGHT = 720;
+export const TILE_SIZE                  = 64
+export const GRID_SIZE                  = 50;
+export const GAME_WIDTH                 = 1280;
+export const GAME_HEIGHT                = 720;
 export let spriteAtlas: Record<string, LJS.TileInfo>;
 export let player: Player;
 export let debugPathFinderWithPlayer    = false;
 export let debugEnemyPathFinder         = false;
 export let debugEnemyInfo               = false;
-export let gameVolume = LJS.soundVolume + 10
+export let gameVolume                   = LJS.soundVolume + 10
 
 
 export const levels = [
@@ -34,8 +33,8 @@ export function spawnNewPlayer(pos: LJS.Vector2){
 
 
 export default function resize(w: number, h: number) {
-    LJS.setCanvasMaxSize(vec2(w, h));
-    LJS.setCanvasFixedSize(vec2(w, h));
+    LJS.setCanvasMaxSize(LJS.vec2(w, h));
+    LJS.setCanvasFixedSize(LJS.vec2(w, h));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,10 +42,11 @@ export function gameInit()
 {
 
     // setup level
+    resize(GAME_WIDTH,GAME_HEIGHT);
+
     LJS.setObjectDefaultDamping(.99);
     LJS.setObjectDefaultAngleDamping(.99);
     LJS.setCameraScale(GRID_SIZE/2);
-    resize(GAME_WIDTH,GAME_HEIGHT);
     new PostProcessPlugin(tvShader);
 
     LJS.setCanvasClearColor(LJS.hsl(100,0,0, .5))
@@ -61,12 +61,20 @@ export function gameInit()
         bishop: gameTile(3),
 
         // collectables 
-        potion: gameTile(vec2(0,1)),
-        coin:   gameTile(vec2(1,1)),
+        potion:     gameTile(LJS.vec2(0,1)),
+        coin:       gameTile(LJS.vec2(1,1)),
+        ammoPk:     gameTile(LJS.vec2(2,1)),
+        speedBst:   gameTile(LJS.vec2(3,1)),
+        shield:     gameTile(LJS.vec2(4,1)),
+        slowDown:   gameTile(LJS.vec2(5,1)),
+        poison:     gameTile(LJS.vec2(6,1)),
 
         // environment
-        wall:   gameTile(vec2(0,2)),
-        floor:  gameTile(vec2(1,2))
+        wall:   gameTile(LJS.vec2(0,2)),
+        floor:  gameTile(LJS.vec2(1,2)),
+        sand:   gameTile(LJS.vec2(2,2)),
+        water:  gameTile(LJS.vec2(3,2)),
+        grass:  gameTile(LJS.vec2(4,2))
 
     };
 

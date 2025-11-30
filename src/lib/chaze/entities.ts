@@ -3,13 +3,24 @@ import * as LJS from "littlejsengine";
 import * as Game from "$lib/chaze/chaze"
 import * as AI from "$lib/chaze/ai"
 import * as Effects from "$lib/chaze/effects";
-import { vec2 } from "littlejsengine";
+import { Color, ParticleEmitter, tile, vec2 } from "littlejsengine";
+import { Switch } from "bits-ui";
 
 const PLAYER_HEALTH = 100
 const KNIGHT_HEALTH = 50
 const ROOK_HEALTH   = 100;
 const BISHIP_HEALTH = 500;
+
+
 let ITEM_ID = 0
+
+export enum BOOST_TYPE{
+    SPEED="SPEED",
+    POISON="POISON",
+    SHIELD="SHIELD",
+    AMMO="AMMO",
+}
+
 export enum ENEMY_STATE{
     IDLE="IDLE",
     PATROL="PATROL",
@@ -31,15 +42,32 @@ export class GameObject extends LJS.EngineObject
     previousState: ENEMY_STATE | undefined;
     ammoCount: number;
     reloadTimer; 
-
-    //
     shootTimer;
     bulletSpeed;
     bulletSpread;
+    baseBulletDamage;
     bulletDamage;
     fireTimeBuffer;
     recoilTimer;
-    fireRate;
+
+
+    boostTimer: LJS.Timer | undefined;
+    boostType: BOOST_TYPE | undefined;
+    
+    
+    baseSpeed: number;
+    speed: number;
+
+
+    baseFireRate: number;
+    fireRate: number;
+
+    baseDamageMultiplier: number;
+    damageMultiplier: number;
+
+    poisonTimer; 
+
+
 
     constructor(pos: LJS.Vector2, size?: LJS.Vector2, tileInfo?: LJS.TileInfo, angle?: number, displayHUD?: boolean)
     {
@@ -54,29 +82,37 @@ export class GameObject extends LJS.EngineObject
         this.ammoCount = 10; 
         this.reloadTimer = new LJS.Timer;
 
+        this.poisonTimer = new LJS.Timer;
+
+        this.baseBulletDamage = 10
+        this.bulletDamage = this.baseBulletDamage
+        
+        this.baseDamageMultiplier = 1 
+        this.damageMultiplier = 1 
+
+        this.baseSpeed = 0.45; 
+        this.speed = this.baseSpeed;
 
         // weapon settings
-        this.fireRate      = 0.1;
-        this.shootTimer    = new LJS.Timer;
-        this.bulletSpeed   = vec2(.5);
-        this.bulletSpread  = .1;
-        this.bulletDamage  = 10;
+        this.baseFireRate           = 0.1;
+        this.fireRate               = this.baseFireRate
+        
+        
+        this.shootTimer         = new LJS.Timer;
+        this.bulletSpeed        = vec2(.5);
+        this.bulletSpread       = .1;
+        this.baseBulletDamage   = 10;
 
         // prepare to fire
         this.fireTimeBuffer = this.localAngle = 0;
         this.recoilTimer = new LJS.Timer;
-        this.displayHUD = true
         this.id = ITEM_ID
         ITEM_ID += 1
     }
 
     update()
     {
-
-        // kill if below level
-        if (!this.isDead() && this.pos.y < -9){
-            this.kill(this);
-        }
+        this.handleBoost()
     }
 
     damage(damage: number, damagingObject: GameObject)
@@ -93,7 +129,8 @@ export class GameObject extends LJS.EngineObject
             child.damageTimer && child.damageTimer.set();
 
         // apply damage and kill if necessary
-        const newHealth = LJS.max(this.health - damage, 0);
+        const newHealth = LJS.max(this.health - (damage * this.damageMultiplier), 0);
+        
         if (!newHealth)
             this.kill(damagingObject);
 
@@ -109,7 +146,7 @@ export class GameObject extends LJS.EngineObject
             let x = this.health/this.fullHealth
             let base = 1
 
-            let healthColor = this.isEnemy ? LJS.RED : LJS.GREEN
+            let healthColor = this.isBoosted(BOOST_TYPE.SHIELD) ? LJS.BLUE : this.isBoosted(BOOST_TYPE.POISON) ? LJS.PURPLE :  this.isEnemy ? LJS.RED : LJS.GREEN
             LJS.drawRect(this.pos.add(vec2(0 ,base)), vec2(1.05, .2), LJS.BLACK);
             LJS.drawRect(this.pos.add(vec2(-.50 +  (x / 2), base)), vec2(x, .15), healthColor);
 
@@ -127,21 +164,75 @@ export class GameObject extends LJS.EngineObject
     }
 
 
+    isBoosted(boost: BOOST_TYPE){
+        return this.boostTimer?.active() && this.boostType == boost
+    }
+
+
     getAngleTowardPos(pos: LJS.Vector2){
         const direction = pos.subtract(this.pos).normalize();
         const angle = LJS.atan2(direction.x, direction.y)
         return angle
     }
 
+    handleBoost(){
+        if (!this.boostTimer?.active()) {
+            this.resetBoost()
+            return
+        }
 
+        if (this.boostTimer.elapsed()) {
+            this.resetBoost();
+            return;
+        }
+
+        switch (this.boostType) {
+            case BOOST_TYPE.POISON:
+                if(!this.poisonTimer.isSet()){
+                    this.poisonTimer.set(0.5)
+                }
+
+                if(this.poisonTimer.elapsed()){
+                    this.damage(this.fullHealth * 0.025, this);
+                    this.poisonTimer.set(0.25)
+                }
+                break;
+
+            case BOOST_TYPE.AMMO:
+                this.fireRate = this.baseFireRate / 2
+                this.bulletDamage = this.baseBulletDamage * 3
+                break;
+
+            case BOOST_TYPE.SPEED:
+                this.speed = this.baseSpeed * 1.50
+                break;
+
+            case BOOST_TYPE.SHIELD:
+                this.damageMultiplier = 0.01;
+                break
+        }
+    }
+
+    resetBoost() {
+        this.speed = this.baseSpeed;
+        this.damageMultiplier = this.baseDamageMultiplier
+        this.fireRate = this.baseFireRate
+        this.bulletDamage = this.baseBulletDamage
+        this.poisonTimer.unset()
+        this.boostType = undefined;
+    }
+
+    applyBoost(boost: BOOST_TYPE, duration: number){
+        this.resetBoost()
+        this.boostTimer = new LJS.Timer(duration)
+        this.boostType = boost
+    }
 
     shoot(angle: number): void {
 
         if(this.ammoCount <= 0 ){
             this.ammoCount = 10
         }
-
-
 
         if(this.ammoCount > 0 && this.shootTimer.elapsed() && this.reloadTimer.elapsed()){
             Effects.sound_shoot.play(this.pos, Game.gameVolume)
@@ -160,9 +251,6 @@ export class GameObject extends LJS.EngineObject
         if(this.shootTimer.elapsed()){
             this.shootTimer.set(this.fireRate)
         }
-
-    
-    
     }
 
 
@@ -188,10 +276,9 @@ export class Player extends GameObject{
     }
 
     update(): void {
-        // apply movement controls
         const moveInput = LJS.keyDirection().clampLength(1).scale(.3);
         if (moveInput.length()) {
-            this.velocity = moveInput;
+            this.applyForce(moveInput.multiply(vec2(this.speed)));
         } else {
             this.velocity = LJS.vec2(0);
         }
@@ -200,6 +287,7 @@ export class Player extends GameObject{
         this.angle = angle - Deg2Rad(90)
         LJS.setCameraPos(this.pos)
         this.handleShoot(angle)
+        super.update()
     }
 
     handleShoot(angle: number){
@@ -220,10 +308,10 @@ export class Player extends GameObject{
 }
 
 export class Enemy extends GameObject{
+    
     wayPoints: LJS.Vector2[];
     patrolRadius;
     nextPos: LJS.Vector2 | undefined;
-    patrolSpeed;
     movementDirs;
     movementTimer;
     bulletDamage;
@@ -231,7 +319,10 @@ export class Enemy extends GameObject{
     movingToAlly: Enemy | undefined;
     haveFled;
     assisting; 
-    lastGoal: LJS.Vector2 | undefined; 
+    lastGoal: LJS.Vector2 | undefined;
+    buffSpeedMultiplier = 1;
+    buffDamageMultiplier = 1; 
+
     constructor(pos: LJS.Vector2, tileInfo: LJS.TileInfo){
         super(pos, vec2(.95), tileInfo )
         this.displayHUD = true
@@ -240,10 +331,9 @@ export class Enemy extends GameObject{
         this.renderOrder = 1
         this.patrolRadius = 4
         this.wayPoints = []
-        this.patrolSpeed = 0.1
         this.movementDirs = AI.directions;
         this.movementTimer = new LJS.Timer(.50);
-        this.bulletDamage = 5
+        this.bulletDamage = this.baseBulletDamage * this.buffDamageMultiplier
         this.fireRate = 0.4
         this.nearbyAllies = []
         this.haveFled = false;
@@ -280,8 +370,9 @@ export class Enemy extends GameObject{
                 if( this.canSeePlayer()){
                     this.playerSeeBehaviour()
                 }
-                if (((this.fullHealth * LJS.rand(0.1, 0.35)) && (!this.haveFled))){
-                    this.state = ENEMY_STATE.FLEE
+                if (this.health == this.fullHealth * LJS.rand(0.1, 0.35)){
+                    if (!this.haveFled)
+                        this.state = ENEMY_STATE.FLEE
                 }
                 break;
             case ENEMY_STATE.FLEE:
@@ -340,7 +431,7 @@ export class Enemy extends GameObject{
         this.nextPos = this.wayPoints.pop()
         if(this.nextPos && this.movementTimer.elapsed()){
                 
-            this.applyForce((this.nextPos.subtract(this.pos).normalize(1)))
+            this.applyForce((this.nextPos.subtract(this.pos).normalize(1).multiply(vec2(this.buffSpeedMultiplier))))
             Effects.sound_walk.play(this.pos, Game.gameVolume)
 
             if (LJS.debugOverlay)
@@ -356,6 +447,22 @@ export class Enemy extends GameObject{
         this.state = ENEMY_STATE.PATROL
     }
 
+    applyBishopBuff() {
+        if (!this.boostTimer?.isSet()) this.boostTimer?.set(1)
+        if (this.boostTimer?.elapsed){
+            this.removeBishopBuff()
+            this.boostTimer.unset()
+        }
+        if (this.boostTimer?.active()){
+            this.buffSpeedMultiplier = 1.4;
+            this.buffDamageMultiplier = 1.3;
+        }
+    }
+
+    removeBishopBuff() {
+        this.buffSpeedMultiplier = 1;
+        this.buffDamageMultiplier = 1;
+    }
 
     canSeePlayer(){
         if (Game.player.pos.distance(this.pos) < 10)
@@ -410,16 +517,79 @@ export class Enemy extends GameObject{
         super.destroy()
     }
 
+    isBoosted(boost: BOOST_TYPE): boolean | undefined {
+        return this.boostTimer?.active()
+    }
+
 }
 
 
 export class Bishop extends Enemy {
+    auraRange: number;
+    auraPulse: LJS.Timer;
+    auraParticles: LJS.Timer;
     constructor(pos: LJS.Vector2){
         super(pos, Game.spriteAtlas.bishop)
         this.fullHealth = BISHIP_HEALTH
         this.health = BISHIP_HEALTH
+        this.auraRange = 4;
+        this.auraPulse = new LJS.Timer();
+        this.auraParticles = new LJS.Timer();
     }
 
+
+    update(): void {
+        this.applyAuraBuffs();
+        super.update()
+    }
+
+
+    applyAuraBuffs() {
+        if (!this.auraPulse.isSet()) this.auraPulse.set(1);
+        if (this.auraPulse.elapsed()){
+            LJS.engineObjectsCallback(
+                this.pos,
+                LJS.vec2(this.auraRange, this.auraRange),
+                (o) => {
+                    if (!(o instanceof Enemy)) return;
+                    if (o === this) return;
+                    o.applyBishopBuff();
+                }
+            );
+            this.emitAuraParticles()
+            this.auraParticles.set(0.1)
+            this.auraPulse.set(1)
+        }
+    }
+
+
+    emitAuraParticles() {
+        new ParticleEmitter(
+        this.pos, 0,	//position, angle
+        1,	// emitSize
+        0.1,	// emitTime
+        500,	// emitRate
+        3,	// emitConeAngle
+        Game.spriteAtlas.shield,	// tileIndex
+        new Color(0.439, 0.933, 1, 1),	// colorStartA
+        new Color(0, 0.667, 1, 1),	// colorStartB
+        new Color(0.341, 1, 0.988, 0),	// colorEndA
+        new Color(0, 0.333, 1, 0),	// colorEndB
+        0.5,	// particleTime
+        0.01,	// sizeStart
+        2,	// sizeEnd
+        0.3,	// speed
+        0,	// angleSpeed
+        1,	// damping
+        1,	// angleDamping
+        0,	// gravityScale
+        0,	// particleConeAngle
+        1,	// fadeRate
+        0.2,	// randomness
+        true,	// additive
+        false
+        ); // particle emitter
+    }
 }
 
 export class Knight extends Enemy {
@@ -438,6 +608,14 @@ export class Knight extends Enemy {
         //     LJS.vec2(-2, -1),
         // ] 
     }
+}
+
+export class Rook extends Enemy {
+    constructor(pos: LJS.Vector2){
+        super(pos, Game.spriteAtlas.rook)
+        this.fullHealth = ROOK_HEALTH
+        this.health = ROOK_HEALTH
+    }
 
     playerSeeBehaviour(): void {
         if (!this.assisting && !this.haveFled){
@@ -448,72 +626,23 @@ export class Knight extends Enemy {
     }
 }
 
-export class Rook extends Enemy {
-    constructor(pos: LJS.Vector2){
-        super(pos, Game.spriteAtlas.rook)
-        this.fullHealth = ROOK_HEALTH
-        this.health = ROOK_HEALTH
-    }
-}
 
 
-export class Potion extends LJS.EngineObject{
-
-    constructor(pos: LJS.Vector2){
-        super(pos, LJS.vec2(.75), Game.spriteAtlas.potion)
-        this.mass = 0;
-    }
-    update(){
-            // check if hit someone
-        LJS.engineObjectsCallback(this.pos, this.size, (o: LJS.EngineObject)=>
-        {
-            if (o instanceof GameObject){
-                this.collideWithObject(o)
-            }
-
-        });
-
-        Effects.healEffect(this.pos)
-
-    }
-    render(){
-        const hoverAmplitude = 0.2;
-        const hoverSpeed = 2;
-        const t = LJS.time + this.pos.x / 4 + this.pos.y / 4;
-        const hoverOffset = LJS.sin(t * hoverSpeed) * hoverAmplitude;
-        const hoverPos = LJS.vec2(this.pos.x, this.pos.y + hoverOffset);
-        LJS.drawTile(hoverPos, this.size, this.tileInfo, this.color);
-        
-
-
-    }
-
-    collideWithObject(object: GameObject): boolean {
-        if (object.health == object.fullHealth) return false
-        object.health = object.fullHealth
-        Effects.sound_score.play(this.pos, Game.gameVolume)
-
-        this.destroy()
-        return true
-    }
-}
-
-
-export class Coin extends LJS.EngineObject 
+export class Collectable extends LJS.EngineObject 
 {
-    constructor(pos: LJS.Vector2) 
+
+    duration: number; 
+
+    constructor(pos: LJS.Vector2, tileInfo: LJS.TileInfo) 
     { 
-        super(pos, LJS.vec2(1), Game.spriteAtlas.coin);
-        this.color = LJS.hsl(.15,1,.5);
+        super(pos, LJS.vec2(1), tileInfo);
         this.mass = 0;
+        this.duration = 15;
     }
 
-    render()
+    spin()
     {
-        // side of coin
         LJS.drawTile(this.pos, LJS.vec2(.1, .6), undefined, this.color);
-
-        // make it appear to spin
         const t = LJS.time+this.pos.x/4+this.pos.y/4;
         const spinSize = LJS.vec2(.5+.5*LJS.sin(t*2*LJS.PI), 1);
         if (spinSize.x > .1)
@@ -522,6 +651,16 @@ export class Coin extends LJS.EngineObject
 
     update()
     {
+
+        // check if hit someone
+        LJS.engineObjectsCallback(this.pos, this.size, (o: LJS.EngineObject)=>
+        {
+            if (o instanceof GameObject && this.interactionCheck(o)){
+                this.collideWithObject(o)
+            }
+
+        });
+
         if (!Game.player)
             return;
 
@@ -530,12 +669,184 @@ export class Coin extends LJS.EngineObject
         if (d > .5)
             return; 
         
-        // award points and destroy
-        // Game.addToScore();
-        // GameEffects.sound_score.play(this.pos);
         this.destroy();
     }
+
+    hover(){
+        const hoverAmplitude = 0.2;
+        const hoverSpeed = 2;
+        const t = LJS.time + this.pos.x / 4 + this.pos.y / 4;
+        const hoverOffset = LJS.sin(t * hoverSpeed) * hoverAmplitude;
+        const hoverPos = LJS.vec2(this.pos.x, this.pos.y + hoverOffset);
+        LJS.drawTile(hoverPos, this.size, this.tileInfo, this.color);
+    }
+
+
+    interactionCheck(o: GameObject): boolean{
+        return true;
+    }
+
 }
+
+
+export class Potion extends Collectable{
+
+    constructor(pos: LJS.Vector2){
+        super(pos, Game.spriteAtlas.potion)
+        this.mass = 0;
+    }
+    update(){        
+        Effects.healEffect(this.pos)
+        super.update()
+    }
+
+    collideWithObject(object: GameObject): boolean {
+        if (object.health == object.fullHealth) return false
+        object.health = object.fullHealth
+        Effects.sound_score.play(this.pos, Game.gameVolume)
+        this.destroy()
+        return true
+    }
+}
+
+
+
+export class Coin extends Collectable
+{
+    constructor(pos: LJS.Vector2) 
+    { 
+        super(pos, Game.spriteAtlas.coin);
+        this.color = LJS.hsl(.15,1,.5);
+        this.mass = 0;
+    }
+
+    update()
+    {
+        super.update()
+    }
+
+    render(): void {
+        this.spin()
+    }
+
+}
+
+
+
+export class Speed extends Collectable
+{
+    constructor(pos: LJS.Vector2) 
+    { 
+        super(pos, Game.spriteAtlas.speedBst);
+        this.color = LJS.hsl(.15,1,.5);
+        this.mass = 0;
+    }
+
+    update()
+    {
+        super.update()
+    }
+
+    render(): void {
+        this.hover()
+    }
+
+    collideWithObject(object: GameObject): boolean {
+        object.applyBoost(BOOST_TYPE.SPEED, this.duration)
+        Effects.sound_score.play(this.pos, Game.gameVolume)
+        this.destroy()
+        return true
+    }
+
+
+    interactionCheck(o: GameObject): boolean {
+        return o instanceof Player
+    }
+
+
+}
+
+
+export class Ammo extends Collectable
+{
+    constructor(pos: LJS.Vector2) 
+    { 
+        super(pos, Game.spriteAtlas.ammoPk);
+        this.color = LJS.hsl(.15,1,.5);
+        this.mass = 0;
+    }
+
+    update()
+    {
+        super.update()
+    }
+
+    render(): void {
+        this.hover()
+    }
+
+    collideWithObject(object: GameObject): boolean {
+        object.applyBoost(BOOST_TYPE.AMMO, this.duration)
+        Effects.sound_score.play(this.pos, Game.gameVolume)
+        this.destroy()
+        return true
+    }
+}
+
+
+export class Poison extends Collectable
+{
+    constructor(pos: LJS.Vector2) 
+    { 
+        super(pos, Game.spriteAtlas.poison);
+        this.mass = 0;
+    }
+
+    render(): void {
+        this.hover()
+    }
+
+    collideWithObject(object: GameObject): boolean {
+        object.applyBoost(BOOST_TYPE.POISON, this.duration)
+        Effects.sound_score.play(this.pos, Game.gameVolume)
+        this.destroy()
+        return true
+    }
+}
+
+
+
+
+
+
+export class Shield extends Collectable
+{
+    constructor(pos: LJS.Vector2) 
+    { 
+        super(pos, Game.spriteAtlas.shield);
+        this.color = LJS.hsl(.15,1,.5);
+        this.mass = 0;
+    }
+
+    update()
+    {
+        super.update()
+    }
+
+    render(): void {
+        this.hover()
+    }
+
+    collideWithObject(object: GameObject): boolean {
+        object.applyBoost(BOOST_TYPE.SHIELD, this.duration)
+        Effects.sound_score.play(this.pos, Game.gameVolume)
+        this.destroy()
+        return true
+    }
+
+
+}
+
 
 export function Deg2Rad(deg: number): number{ 
     return deg * (LJS.PI/180)
