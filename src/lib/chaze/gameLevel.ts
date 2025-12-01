@@ -24,8 +24,13 @@ export function buildLevel() {
 
 export function generateMap(){
   LJS.engineObjectsDestroy();
-  proceduralMap()
-  return findCenterSpawn(20);
+  let gameArea: LJS.Vector2[] = []
+  while (gameArea.length < 100){
+    proceduralMap()
+    gameArea = [...findAvailableArea(30)]
+  }
+
+  return choosePlayerSpawn(gameArea);
 
 }
 
@@ -197,21 +202,17 @@ function isEdge(x: number, y: number, grid: number) {
 }
 
 
-export function findCenterSpawn(radius = 20) {
+export function findAvailableArea(radius = 20): LJS.Vector2[] {
 
     const centerPos = LJS.vec2(levelSize.x / 2, levelSize.y / 2);
     
-    const centerObj = new LJS.EngineObject(centerPos, LJS.vec2(4));
+    const centerObj = new LJS.EngineObject(centerPos, LJS.vec2(1));
 
     const available = getAvailablePointsNearObjectBFS(centerObj, radius);
-    centerObj.destroy()
-    if (available.length === 0) {
-        return centerPos.add(LJS.vec2(.5));
-    }
 
-    const chosen = pickRandomPoints(available);
+    centerObj.destroy()
     
-    return chosen.add(LJS.vec2(.5));
+    return available
 }
 
 
@@ -268,4 +269,12 @@ export function spawnEnemies(player: GameObject, numEnemies = 6, numCollectables
     }
 
     return spawnedEnemies;
+}
+
+
+export function choosePlayerSpawn(available: LJS.Vector2[]){
+
+    const chosen = pickRandomPoints(available);
+    return chosen
+
 }

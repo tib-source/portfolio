@@ -103,6 +103,9 @@ export class GameObject extends LJS.EngineObject
         this.bulletSpread       = .1;
         this.baseBulletDamage   = 10;
 
+
+        this.boostTimer = new LJS.Timer;
+
         // prepare to fire
         this.fireTimeBuffer = this.localAngle = 0;
         this.recoilTimer = new LJS.Timer;
@@ -210,6 +213,8 @@ export class GameObject extends LJS.EngineObject
             case BOOST_TYPE.SHIELD:
                 this.damageMultiplier = 0.01;
                 break
+            
+
         }
     }
 
@@ -251,6 +256,11 @@ export class GameObject extends LJS.EngineObject
         if(this.shootTimer.elapsed()){
             this.shootTimer.set(this.fireRate)
         }
+    }
+
+
+    debuf(){
+        this.additiveColor = LJS.hsl(.15,1,.5);
     }
 
 
@@ -448,8 +458,9 @@ export class Enemy extends GameObject{
     }
 
     applyBishopBuff() {
-        if (!this.boostTimer?.isSet()) this.boostTimer?.set(1)
-        if (this.boostTimer?.elapsed){
+        if (!this.boostTimer || !this.boostTimer.isSet()) 
+            this.boostTimer = new LJS.Timer(3)
+        if (this.boostTimer?.elapsed()){
             this.removeBishopBuff()
             this.boostTimer.unset()
         }
@@ -527,19 +538,18 @@ export class Enemy extends GameObject{
 export class Bishop extends Enemy {
     auraRange: number;
     auraPulse: LJS.Timer;
-    auraParticles: LJS.Timer;
     constructor(pos: LJS.Vector2){
         super(pos, Game.spriteAtlas.bishop)
         this.fullHealth = BISHIP_HEALTH
         this.health = BISHIP_HEALTH
-        this.auraRange = 4;
+        this.auraRange = 5;
         this.auraPulse = new LJS.Timer();
-        this.auraParticles = new LJS.Timer();
     }
 
 
     update(): void {
-        this.applyAuraBuffs();
+        if(this.state != ENEMY_STATE.IDLE)
+            this.applyAuraBuffs();
         super.update()
     }
 
@@ -547,17 +557,20 @@ export class Bishop extends Enemy {
     applyAuraBuffs() {
         if (!this.auraPulse.isSet()) this.auraPulse.set(1);
         if (this.auraPulse.elapsed()){
-            LJS.engineObjectsCallback(
-                this.pos,
-                LJS.vec2(this.auraRange, this.auraRange),
-                (o) => {
-                    if (!(o instanceof Enemy)) return;
-                    if (o === this) return;
-                    o.applyBishopBuff();
+            let nearby = AI.getNearbyObjectBFS(this, this.auraRange, GameObject);
+            for (let o of nearby){
+                if (o instanceof Player){
+                    o.damage(this.bulletDamage * 0.025, this)
                 }
-            );
+                if (o instanceof Enemy){
+                    if (o === this) return;
+                    o.applyBishopBuff()
+                }
+            }
+
             this.emitAuraParticles()
-            this.auraParticles.set(0.1)
+            // if (nearby.length != 0){
+            // }
             this.auraPulse.set(1)
         }
     }
@@ -567,8 +580,8 @@ export class Bishop extends Enemy {
         new ParticleEmitter(
         this.pos, 0,	//position, angle
         1,	// emitSize
-        0.1,	// emitTime
-        500,	// emitRate
+        0.2,	// emitTime
+        50,	// emitRate
         3,	// emitConeAngle
         Game.spriteAtlas.shield,	// tileIndex
         new Color(0.439, 0.933, 1, 1),	// colorStartA
@@ -576,16 +589,16 @@ export class Bishop extends Enemy {
         new Color(0.341, 1, 0.988, 0),	// colorEndA
         new Color(0, 0.333, 1, 0),	// colorEndB
         0.5,	// particleTime
-        0.01,	// sizeStart
-        2,	// sizeEnd
-        0.3,	// speed
+        0.5,	// sizeStart
+        1,	// sizeEnd
+        0.1,	// speed
         0,	// angleSpeed
         1,	// damping
         1,	// angleDamping
         0,	// gravityScale
         0,	// particleConeAngle
-        1,	// fadeRate
-        0.2,	// randomness
+        0.5,	// fadeRate
+        0,	// randomness
         true,	// additive
         false
         ); // particle emitter

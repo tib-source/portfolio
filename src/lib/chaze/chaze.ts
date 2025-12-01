@@ -40,7 +40,9 @@ export default function resize(w: number, h: number) {
 ///////////////////////////////////////////////////////////////////////////////
 export function gameInit()
 {
-
+    // enable debug screens 
+    LJS.setDebugWatermark(true)
+    LJS.uiSetDebug(1)
     // setup level
     resize(GAME_WIDTH,GAME_HEIGHT);
 
