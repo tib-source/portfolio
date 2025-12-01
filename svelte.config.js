@@ -22,7 +22,7 @@ const config = {
 			precompress: false
 		}),
 		alias: {
-			'littlejsengine': 'node_modules/littlejsengine/dist/littlejs.esm.js'
+			littlejsengine: 'node_modules/littlejsengine/dist/littlejs.esm.js'
 		}
 	}
 };

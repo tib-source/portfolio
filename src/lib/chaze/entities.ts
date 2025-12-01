@@ -7,8 +7,8 @@ import { Switch } from 'bits-ui';
 
 const PLAYER_HEALTH = 100;
 const KNIGHT_HEALTH = 50;
-const ROOK_HEALTH = 100;
-const BISHIP_HEALTH = 500;
+const ROOK_HEALTH = 200;
+const BISHIP_HEALTH = 200;
 
 let ITEM_ID = 0;
 
@@ -87,7 +87,7 @@ export class GameObject extends LJS.EngineObject {
 		this.baseDamageMultiplier = 1;
 		this.damageMultiplier = 1;
 
-		this.baseSpeed = 0.45;
+		this.baseSpeed = 0.15;
 		this.speed = this.baseSpeed;
 
 		// weapon settings
@@ -164,9 +164,12 @@ export class GameObject extends LJS.EngineObject {
 		return this.boostTimer?.active() && this.boostType == boost;
 	}
 
-	getAngleTowardPos(pos: LJS.Vector2) {
+	getAngleTowardPos(pos: LJS.Vector2, mirror?: boolean) {
 		const direction = pos.subtract(this.pos).normalize();
 		const angle = LJS.atan2(direction.x, direction.y);
+		if (mirror) {
+			return -angle;
+		}
 		return angle;
 	}
 
@@ -192,12 +195,10 @@ export class GameObject extends LJS.EngineObject {
 					this.poisonTimer.set(0.25);
 				}
 				break;
-
 			case BOOST_TYPE.AMMO:
 				this.fireRate = this.baseFireRate / 2;
-				this.bulletDamage = this.baseBulletDamage * 3;
+				this.bulletDamage = this.baseBulletDamage * 1.5;
 				break;
-
 			case BOOST_TYPE.SPEED:
 				this.speed = this.baseSpeed * 1.5;
 				break;
@@ -223,12 +224,13 @@ export class GameObject extends LJS.EngineObject {
 		this.boostType = boost;
 	}
 
-	shoot(angle: number): void {
+	shoot(angle: number, pos?: LJS.Vector2, rotate?: boolean): void {
 		if (this.ammoCount <= 0) {
 			this.ammoCount = 10;
 		}
 
 		if (this.ammoCount > 0 && this.shootTimer.elapsed() && this.reloadTimer.elapsed()) {
+			let bullPos = pos || this.pos;
 			Effects.sound_shoot.play(this.pos, Game.gameVolume);
 			const direction = LJS.vec2(5 * this.getMirrorSign(), 0).setAngle(angle);
 			this.applyForce(
@@ -236,12 +238,13 @@ export class GameObject extends LJS.EngineObject {
 					.setAngle(angle - Deg2Rad(180))
 					.clampLength(0.1)
 			);
+			if (rotate) this.localAngle += -LJS.rand(0.2, 0.25);
 			const velocity = direction.rotate(LJS.rand(-1, 1) * this.bulletSpread);
-			new Bullet(this.pos, this, velocity, this.bulletDamage, angle);
+			new Bullet(bullPos, this, velocity, this.bulletDamage, angle);
 			this.ammoCount = this.ammoCount - 1;
 
 			if (this.ammoCount <= 0) {
-				this.reloadTimer.set(2);
+				this.reloadTimer.set(0.5);
 			}
 		}
 
@@ -259,30 +262,86 @@ export class GameObject extends LJS.EngineObject {
 	}
 }
 
-export class Player extends GameObject {
+export class Gun extends GameObject {
+	triggerIsDown: boolean = false;
 	shootTimer;
+
+	constructor(pos: LJS.Vector2) {
+		super(pos, LJS.vec2(0.65), Game.spriteAtlas.pistol);
+		this.shootTimer = new LJS.Timer(0);
+		this.reloadTimer = new LJS.Timer(0);
+		this.displayHUD = false;
+		this.setCollision(false, false, true);
+	}
+
+	update(): void {
+		this.mirror = this.parent.mirror;
+		this.boostType = this.parent.boostType;
+		this.boostTimer = this.parent.boostTimer;
+
+		if (this.triggerIsDown) {
+			let shootAngle = this.angle + Deg2Rad(90);
+			if (this.mirror) shootAngle = this.angle - Deg2Rad(90);
+			this.shoot(shootAngle, undefined, true);
+		}
+		super.update();
+	}
+
+	collideWithObject(object: LJS.EngineObject): boolean {
+		return false;
+	}
+
+	damage(damage: number, damagingObject: GameObject): number {
+		return 0;
+	}
+}
+
+export class Player extends GameObject {
+	weapon;
+	holdingShoot: boolean = false;
+	moveInput: LJS.Vector2 | undefined;
 
 	constructor(pos: LJS.Vector2) {
 		super(pos, LJS.vec2(1), Game.spriteAtlas.pawn, 0);
 		this.fullHealth = PLAYER_HEALTH;
 		this.health = PLAYER_HEALTH;
 		this.renderOrder = 1;
-		this.shootTimer = new LJS.Timer(0.25);
 		this.setCollision();
+
+		// attach weapon
+		this.weapon = new Gun(pos);
+		this.weapon.renderOrder = this.renderOrder + 1;
+		this.addChild(this.weapon, vec2(1, 0));
 	}
 
 	update(): void {
-		const moveInput = LJS.keyDirection().clampLength(1).scale(0.3);
-		if (moveInput.length()) {
-			this.applyForce(moveInput.multiply(vec2(this.speed)));
+		this.holdingShoot =
+			(!LJS.isUsingGamepad && LJS.mouseIsDown(0)) || LJS.keyIsDown('KeyZ') || LJS.gamepadIsDown(2);
+		this.moveInput = LJS.isUsingGamepad ? LJS.gamepadStick(0) : LJS.keyDirection();
+
+		this.mirror = false;
+
+		let angle = this.getAngleTowardPos(LJS.mousePos, this.mirror);
+		console.log(angle, Deg2Rad(180));
+		if (angle < Deg2Rad(0)) {
+			this.mirror = true;
+			angle = this.getAngleTowardPos(LJS.mousePos, this.mirror);
+		}
+		this.children.forEach((c: GameObject) => {
+			c.localPos = c.localPos.setAngle(angle).normalize(0.4);
+			c.localAngle = angle - Deg2Rad(90);
+		});
+
+		if (this.moveInput.length()) {
+			this.applyForce(this.moveInput.multiply(vec2(this.speed)));
 		} else {
 			this.velocity = LJS.vec2(0);
 		}
 
-		let angle = this.getAngleTowardPos(LJS.mousePos);
-		this.angle = angle - Deg2Rad(90);
+		if (this.weapon) this.weapon.triggerIsDown = this.holdingShoot && !this.recoilTimer.isSet();
+
 		LJS.setCameraPos(this.pos);
-		this.handleShoot(angle);
+		// this.handleShoot(angle);
 		super.update();
 	}
 
@@ -315,10 +374,10 @@ export class Enemy extends GameObject {
 	haveFled;
 	assisting;
 	lastGoal: LJS.Vector2 | undefined;
-    bishopBuffTimer: LJS.Timer;
+	bishopBuffTimer: LJS.Timer;
 	buffSpeedMultiplier = 1;
 	buffDamageMultiplier = 1;
-
+	accuracy = 1;
 	constructor(pos: LJS.Vector2, tileInfo: LJS.TileInfo) {
 		super(pos, vec2(0.95), tileInfo);
 		this.displayHUD = true;
@@ -330,15 +389,15 @@ export class Enemy extends GameObject {
 		this.movementDirs = AI.directions;
 		this.movementTimer = new LJS.Timer(0.5);
 		this.bulletDamage = this.baseBulletDamage * this.buffDamageMultiplier;
-		this.fireRate = 0.4;
+		this.baseFireRate = 0.4;
 		this.nearbyAllies = [];
 		this.haveFled = false;
 		this.assisting = false;
 		this.state = ENEMY_STATE.PATROL;
 		this.shootTimer = new LJS.Timer(0);
 		this.reloadTimer = new LJS.Timer(0);
-        this.bishopBuffTimer = new LJS.Timer(0);
-    }
+		this.bishopBuffTimer = new LJS.Timer(0);
+	}
 
 	update(): void {
 		let brightness = 0;
@@ -349,7 +408,6 @@ export class Enemy extends GameObject {
 			brightness = 0.5 * LJS.percent(this.damageTimer.get(), 0.15, 0);
 		}
 		this.additiveColor = LJS.hsl(0, 0, brightness, 0);
-
 		switch (this.state) {
 			case ENEMY_STATE.IDLE:
 				break; // do nothing
@@ -373,6 +431,8 @@ export class Enemy extends GameObject {
 				this.alertNearbyAlly();
 				break;
 		}
+
+		super.update();
 	}
 
 	patrol() {
@@ -396,7 +456,9 @@ export class Enemy extends GameObject {
 	}
 
 	playerSeeBehaviour() {
-		this.shoot(this.getAngleTowardPos(Game.player.pos));
+		let playerAngle = this.getAngleTowardPos(Game.player.pos);
+		playerAngle += Deg2Rad(LJS.rand(0, 10 * this.accuracy));
+		this.shoot(playerAngle);
 		this.moveToPosition(Game.player.pos);
 	}
 
@@ -434,7 +496,8 @@ export class Enemy extends GameObject {
 	}
 
 	applyBishopBuff() {
-		if (!this.bishopBuffTimer || !this.bishopBuffTimer.isSet()) this.bishopBuffTimer = new LJS.Timer(3);
+		if (!this.bishopBuffTimer || !this.bishopBuffTimer.isSet())
+			this.bishopBuffTimer = new LJS.Timer(3);
 		if (this.bishopBuffTimer?.elapsed()) {
 			this.removeBishopBuff();
 			this.bishopBuffTimer.unset();
@@ -489,7 +552,9 @@ export class Enemy extends GameObject {
 	}
 
 	damage(damage: number, damagingObject: GameObject) {
-		this.state = ENEMY_STATE.ATTACK;
+		if (this.state !== ENEMY_STATE.ATTACK) {
+			this.state = ENEMY_STATE.ATTACK;
+		}
 		return super.damage(damage, damagingObject);
 	}
 
@@ -499,7 +564,7 @@ export class Enemy extends GameObject {
 	}
 
 	isBoosted(boost: BOOST_TYPE): boolean | undefined {
-		return this.bishopBuffTimer.active() || super.isBoosted(boost) ;
+		return this.bishopBuffTimer.active() || super.isBoosted(boost);
 	}
 }
 
@@ -525,7 +590,7 @@ export class Bishop extends Enemy {
 			let nearby = AI.getNearbyObjectBFS(this, this.auraRange, GameObject);
 			for (let o of nearby) {
 				if (o instanceof Player) {
-                    // debug/damange player when theyre in the bishops range 
+					// debug/damange player when theyre in the bishops range
 					o.damage(this.bulletDamage * 0.01, this);
 				}
 				if (o instanceof Enemy) {
@@ -582,6 +647,8 @@ export class Rook extends Enemy {
 		super(pos, Game.spriteAtlas.rook);
 		this.fullHealth = ROOK_HEALTH;
 		this.health = ROOK_HEALTH;
+		this.baseFireRate = 0.2;
+		this.baseBulletDamage = this.baseBulletDamage * 0.8;
 	}
 
 	playerSeeBehaviour(): void {
@@ -602,20 +669,15 @@ export class Collectable extends LJS.EngineObject {
 		this.duration = 15;
 	}
 
-	spin() {
-		LJS.drawTile(this.pos, LJS.vec2(0.1, 0.6), undefined, this.color);
-		const t = LJS.time + this.pos.x / 4 + this.pos.y / 4;
-		const spinSize = LJS.vec2(0.5 + 0.5 * LJS.sin(t * 2 * LJS.PI), 1);
-		if (spinSize.x > 0.1) LJS.drawTile(this.pos, spinSize, this.tileInfo, this.color);
-	}
-
 	update() {
 		// check if hit someone
 		LJS.engineObjectsCallback(this.pos, this.size, (o: LJS.EngineObject) => {
-			if (o instanceof GameObject && this.interactionCheck(o)) {
+			if ((o instanceof Player || o instanceof Enemy) && this.interactionCheck(o)) {
 				this.collideWithObject(o);
 			}
 		});
+
+		if (this.destroyed) return;
 
 		if (!Game.player) return;
 
@@ -633,6 +695,13 @@ export class Collectable extends LJS.EngineObject {
 		const hoverOffset = LJS.sin(t * hoverSpeed) * hoverAmplitude;
 		const hoverPos = LJS.vec2(this.pos.x, this.pos.y + hoverOffset);
 		LJS.drawTile(hoverPos, this.size, this.tileInfo, this.color);
+	}
+
+	spin() {
+		LJS.drawTile(this.pos, LJS.vec2(0.1, 0.6), undefined, this.color);
+		const t = LJS.time + this.pos.x / 4 + this.pos.y / 4;
+		const spinSize = LJS.vec2(0.5 + 0.5 * LJS.sin(t * 2 * LJS.PI), 1);
+		if (spinSize.x > 0.1) LJS.drawTile(this.pos, spinSize, this.tileInfo, this.color);
 	}
 
 	interactionCheck(o: GameObject): boolean {
@@ -799,7 +868,12 @@ export class Bullet extends LJS.EngineObject {
 	update() {
 		// check if hit someone
 		LJS.engineObjectsCallback(this.pos, this.size, (o: LJS.EngineObject) => {
-			if (o instanceof GameObject && o.isGameObject && o != this.attacker) {
+			if (
+				o instanceof GameObject &&
+				o.isGameObject &&
+				o != this.attacker &&
+				o != this.attacker.parent
+			) {
 				this.collideWithObject(o);
 			}
 		});

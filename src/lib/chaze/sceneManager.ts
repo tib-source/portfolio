@@ -1,11 +1,4 @@
-import {
-	engineObjectsDestroy,
-	keyIsDown,
-	keyWasPressed,
-	mouseWasReleased,
-	keyWasReleased,
-	gamepadWasReleased
-} from 'littlejsengine';
+import { engineObjectsDestroy } from 'littlejsengine';
 import Scene from './scene/scene.js';
 import Chaze from './scene/chaze.js';
 import Main from './scene/main.js';

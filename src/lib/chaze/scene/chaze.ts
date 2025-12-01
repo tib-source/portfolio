@@ -11,7 +11,7 @@ export let enemiesLeft = baseEnemyCount;
 export const waveTimer = new LJS.Timer();
 let enemiesSpawned = false;
 let enemies: Set<Enemy> = new Set();
-let timeBetweenWaves = 0.1;
+let timeBetweenWaves = 5;
 
 function getEnemyCount() {
 	return Math.floor(baseEnemyCount * (wave / 1.5));
