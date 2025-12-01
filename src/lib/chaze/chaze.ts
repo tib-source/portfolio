@@ -15,6 +15,7 @@ export let player: Player;
 export let debugPathFinderWithPlayer = false;
 export let debugEnemyPathFinder = false;
 export let debugEnemyInfo = false;
+export let debugDisableEnemyShooting = false;
 export let gameVolume = LJS.soundVolume + 10;
 
 export const levels = [level1];
@@ -80,11 +81,17 @@ export function gameUpdate() {
 	if (LJS.keyWasPressed('Digit1')) {
 		debugPathFinderWithPlayer = !debugPathFinderWithPlayer;
 	}
-	if (LJS.keyWasPressed('Digit2')) {
+	
+    if (LJS.keyWasPressed('Digit2')) {
 		debugEnemyPathFinder = !debugEnemyPathFinder;
 	}
-	if (LJS.keyWasPressed('Digit3')) {
+	
+    if (LJS.keyWasPressed('Digit3')) {
 		debugEnemyInfo = !debugEnemyInfo;
+	}
+    
+    if (LJS.keyWasPressed('Digit4')) {
+       debugDisableEnemyShooting = !debugDisableEnemyShooting;
 	}
 
 	if (LJS.keyWasPressed('Backspace')) {

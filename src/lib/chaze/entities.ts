@@ -5,9 +5,9 @@ import * as Effects from '$lib/chaze/effects';
 import { Color, ParticleEmitter, tile, vec2 } from 'littlejsengine';
 import { Switch } from 'bits-ui';
 
-const PLAYER_HEALTH = 100;
+const PLAYER_HEALTH = 200;
 const KNIGHT_HEALTH = 50;
-const ROOK_HEALTH = 200;
+const ROOK_HEALTH = 150;
 const BISHIP_HEALTH = 200;
 
 let ITEM_ID = 0;
@@ -375,6 +375,7 @@ export class Enemy extends GameObject {
 	assisting;
 	lastGoal: LJS.Vector2 | undefined;
 	bishopBuffTimer: LJS.Timer;
+    movementInterval: number;
 	buffSpeedMultiplier = 1;
 	buffDamageMultiplier = 1;
 	accuracy = 1;
@@ -384,12 +385,12 @@ export class Enemy extends GameObject {
 		this.isEnemy = true;
 		this.setCollision();
 		this.renderOrder = 1;
-		this.patrolRadius = 4;
+		this.patrolRadius = 3;
 		this.wayPoints = [];
 		this.movementDirs = AI.directions;
 		this.movementTimer = new LJS.Timer(0.5);
 		this.bulletDamage = this.baseBulletDamage * this.buffDamageMultiplier;
-		this.baseFireRate = 0.4;
+		this.baseFireRate = 0.5;
 		this.nearbyAllies = [];
 		this.haveFled = false;
 		this.assisting = false;
@@ -397,7 +398,8 @@ export class Enemy extends GameObject {
 		this.shootTimer = new LJS.Timer(0);
 		this.reloadTimer = new LJS.Timer(0);
 		this.bishopBuffTimer = new LJS.Timer(0);
-	}
+        this.movementInterval = 0.25
+    }
 
 	update(): void {
 		let brightness = 0;
@@ -458,7 +460,9 @@ export class Enemy extends GameObject {
 	playerSeeBehaviour() {
 		let playerAngle = this.getAngleTowardPos(Game.player.pos);
 		playerAngle += Deg2Rad(LJS.rand(0, 10 * this.accuracy));
-		this.shoot(playerAngle);
+        if(!Game.debugDisableEnemyShooting){
+            this.shoot(playerAngle);
+        }
 		this.moveToPosition(Game.player.pos);
 	}
 
@@ -486,7 +490,7 @@ export class Enemy extends GameObject {
 
 			if (LJS.debugOverlay) LJS.debugPoint(this.nextPos, LJS.RED, 0.1);
 
-			this.movementTimer.set(0.25);
+			this.movementTimer.set(this.movementInterval);
 		}
 	}
 
@@ -503,8 +507,8 @@ export class Enemy extends GameObject {
 			this.bishopBuffTimer.unset();
 		}
 		if (this.bishopBuffTimer?.active()) {
-			this.buffSpeedMultiplier = 1.4;
-			this.buffDamageMultiplier = 1.3;
+			this.buffSpeedMultiplier = 1.2;
+			this.buffDamageMultiplier = 1.25;
 		}
 	}
 
@@ -647,7 +651,7 @@ export class Rook extends Enemy {
 		super(pos, Game.spriteAtlas.rook);
 		this.fullHealth = ROOK_HEALTH;
 		this.health = ROOK_HEALTH;
-		this.baseFireRate = 0.2;
+		this.baseFireRate = 0.3;
 		this.baseBulletDamage = this.baseBulletDamage * 0.8;
 	}
 
