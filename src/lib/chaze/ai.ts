@@ -201,7 +201,7 @@ export function generateGrid(offset: boolean = true) {
 			let collision = LJS.tileCollisionTest(pos, LJS.vec2(1));
 			let node = new Node(pos);
 			if (collision) {
-				if (debugEnemyPathFinder || debugEnemyPathFinder) LJS.debugPoint(pos, LJS.RED, 0.1);
+				// if (debugEnemyPathFinder || debugEnemyPathFinder) LJS.debugPoint(pos, LJS.RED, 0.1);
 				node.walkable = false;
 			}
 
