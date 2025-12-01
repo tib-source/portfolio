@@ -1,36 +1,35 @@
-import * as LJS from "littlejsengine"
+import * as LJS from 'littlejsengine';
 
-export function healEffect(pos: LJS.Vector2){
-    let heal = new LJS.ParticleEmitter(
-        pos, 0,	//position, angle
-        1,	// emitSize
-        0.1,	// emitTime
-        10,	// emitRate
-        3,	// emitConeAngle
-        LJS.tile(6, 16),	// tileIndex
-        new LJS.Color(0.439, 1, 0.451, .7),	// colorStartA
-        new LJS.Color(0.11, 0.992, 0.537, .7),	// colorStartB
-        new LJS.Color(0.235, 1, 0.18, 0),	// colorEndA
-        new LJS.Color(0, 1, 0.533, 0),	// colorEndB
-        0.5,	// particleTime
-        0.01,	// sizeStart
-        1,	// sizeEnd
-        0.001,	// speed
-        0,	// angleSpeed
-        1,	// damping
-        1,	// angleDamping
-        0,	// gravityScale
-        3.14,	// particleConeAngle
-        0.05,	// fadeRate
-        0.2,	// randomness
-        false,
-        true
-        ) // particle emitter
+export function healEffect(pos: LJS.Vector2) {
+	let heal = new LJS.ParticleEmitter(
+		pos,
+		0, //position, angle
+		1, // emitSize
+		0.1, // emitTime
+		10, // emitRate
+		3, // emitConeAngle
+		LJS.tile(6, 16), // tileIndex
+		new LJS.Color(0.439, 1, 0.451, 0.7), // colorStartA
+		new LJS.Color(0.11, 0.992, 0.537, 0.7), // colorStartB
+		new LJS.Color(0.235, 1, 0.18, 0), // colorEndA
+		new LJS.Color(0, 1, 0.533, 0), // colorEndB
+		0.5, // particleTime
+		0.01, // sizeStart
+		1, // sizeEnd
+		0.001, // speed
+		0, // angleSpeed
+		1, // damping
+		1, // angleDamping
+		0, // gravityScale
+		3.14, // particleConeAngle
+		0.05, // fadeRate
+		0.2, // randomness
+		false,
+		true
+	); // particle emitter
 
-    return heal
-
+	return heal;
 }
-
 
 export const sound_shoot =        new LJS.Sound([,,90,,.01,.03,4,,,,,,,9,50,.2,,.2,.01]);
 export const sound_destroyObject =new LJS.Sound([.5,,1e3,.02,,.2,1,3,.1,,,,,1,-30,.5,,.5]);

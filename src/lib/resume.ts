@@ -17,12 +17,12 @@ export const resumeData = {
 			company: 'Matillion, Manchester',
 			period: 'July 2024 - Present',
 			achievements: [
-			'Migrated 700+ repos from Bitbucket to GitHub with a Python tool, cutting manual effort by 90%.',
-			'Built "Maker" CLI to automate local Kubernetes & ArgoCD development environments.',
-			'Developed an Artifactory cleanup utility, reclaiming over 400GB of storage and preventing stale artifacts.',
-			'Rotated as DevX support, resolving Terraform, PagerDuty, GitHub, CircleCI, and Maker issues via Slack.',
-			'Wrote documentation and led workshops for Maker to boost internal adoption.'
-		],
+				'Migrated 700+ repos from Bitbucket to GitHub with a Python tool, cutting manual effort by 90%.',
+				'Built "Maker" CLI to automate local Kubernetes & ArgoCD development environments.',
+				'Developed an Artifactory cleanup utility, reclaiming over 400GB of storage and preventing stale artifacts.',
+				'Rotated as DevX support, resolving Terraform, PagerDuty, GitHub, CircleCI, and Maker issues via Slack.',
+				'Wrote documentation and led workshops for Maker to boost internal adoption.'
+			],
 			skills: ['Kubernetes', 'ArgoCD', 'Python', 'Terraform', 'Docker']
 		},
 		{
