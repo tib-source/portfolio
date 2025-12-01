@@ -72,7 +72,7 @@
 			color: white;
 			will-change: transform;
 
-			.hello{ 
+			.hello {
 				display: flex;
 			}
 
@@ -85,7 +85,7 @@
 				box-shadow:
 					0.75rem 0 var(--secondary),
 					0rem 0 10rem color-mix(in srgb, var(--secondary) 30%, transparent);
-				border: .25rem solid white;
+				border: 0.25rem solid white;
 			}
 
 			.me-placeholder {
@@ -127,11 +127,11 @@
 			.intro {
 				gap: 2rem;
 				position: relative;
-				.me{
+				.me {
 					width: 90px;
 					margin-bottom: -1rem;
 				}
-				.text {					
+				.text {
 					width: 150px;
 					justify-content: center;
 					h1 {
@@ -143,7 +143,7 @@
 					P {
 						top: 7rem;
 						left: 0rem;
-						font-size: .85rem;
+						font-size: 0.85rem;
 					}
 				}
 			}

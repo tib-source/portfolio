@@ -1,4 +1,3 @@
-
 export const tvShader = `
 // Simple TV Shader Code
 float hash(vec2 p)
@@ -50,4 +49,3 @@ void mainImage(out vec4 c, vec2 p)
     float dx = 2.*p.x-1., dy = 2.*p.y-1.;
     c *= 1.-pow((dx*dx + dy*dy)/vignette, vignettePow);
 }`;
-
