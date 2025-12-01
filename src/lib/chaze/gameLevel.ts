@@ -80,7 +80,7 @@ function loadLevelData(level: number) {
 				}
 
 				if (tileData == tileLookup.wall) {
-					let o = new LJS.EngineObject(objectPos, LJS.vec2(0.5), LJS.tile(10, 64, 0, 0));
+					let o = new LJS.EngineObject(objectPos, LJS.vec2(0.9), LJS.tile(10, 64, 0, 0));
 					o.setCollision();
 					o.mass = 0;
 					mapLayer.setCollisionData(pos, 1);
@@ -199,15 +199,11 @@ export function spawnEnemies(
 	for (let i = 0; i < numEnemies && availableTiles.length > 0; i++) {
 		const pos = pickRandomPoints(availableTiles);
 
-		const enemyClasses = [
-			GameObjects.Bishop
-			// GameObjects.Knight,
-			// GameObjects.Rook
-		];
+		const enemyClasses = [GameObjects.Bishop, GameObjects.Knight, GameObjects.Rook];
 
 		const enemyType = pickRandomPoints(enemyClasses);
 		const enemy = new enemyType(pos);
-		// enemy.state = GameObjects.ENEMY_STATE.ATTACK
+		enemy.state = GameObjects.ENEMY_STATE.ATTACK;
 		spawnedEnemies.push(enemy);
 		availableTiles.splice(availableTiles.indexOf(pos), 1);
 	}

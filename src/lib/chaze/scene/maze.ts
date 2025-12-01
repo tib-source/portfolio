@@ -50,7 +50,7 @@ export default class Maze extends Scene {
 	renderPost() {
 		let healthBarWidth = 350;
 		LJS.engineFontImage.drawTextScreen(
-			`Ammo : ${'*'.repeat(player.ammoCount)}`,
+			`Ammo : ${'*'.repeat(player.weapon.ammoCount)}`,
 			LJS.vec2(40, 30),
 			20,
 			false,

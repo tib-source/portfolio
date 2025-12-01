@@ -32,13 +32,13 @@ export default function resize(w: number, h: number) {
 
 export function gameInit() {
 	// enable debug screens
-	LJS.setDebugWatermark(true);
-	LJS.uiSetDebug(1);
 	resize(GAME_WIDTH, GAME_HEIGHT);
 
 	LJS.setObjectDefaultDamping(0.99);
 	LJS.setObjectDefaultAngleDamping(0.99);
-	LJS.setCameraScale(55);
+	LJS.setCameraScale(70);
+	LJS.setCanvasPixelated(true);
+	LJS.uiSetDebug(2);
 	new PostProcessPlugin(tvShader);
 
 	LJS.setCanvasClearColor(LJS.hsl(100, 0, 0, 0.5));
@@ -47,9 +47,10 @@ export function gameInit() {
 	spriteAtlas = {
 		// player tiles
 		rook: gameTile(0),
-		pawn: gameTile(1),
+		// pawn: gameTile(1),
 		knight: gameTile(2),
 		bishop: gameTile(3),
+		pawn: gameTile(4),
 
 		// collectables
 		potion: gameTile(LJS.vec2(0, 1)),
@@ -59,6 +60,7 @@ export function gameInit() {
 		shield: gameTile(LJS.vec2(4, 1)),
 		slowDown: gameTile(LJS.vec2(5, 1)),
 		poison: gameTile(LJS.vec2(6, 1)),
+		pistol: gameTile(LJS.vec2(7, 1)),
 
 		// environment
 		wall: gameTile(LJS.vec2(0, 2)),
