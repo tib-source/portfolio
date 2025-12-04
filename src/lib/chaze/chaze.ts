@@ -16,7 +16,7 @@ export let debugPathFinderWithPlayer = false;
 export let debugEnemyPathFinder = false;
 export let debugEnemyInfo = false;
 export let debugDisableEnemyShooting = false;
-export let gameVolume = LJS.soundVolume + 10;
+export let gameVolume = LJS.soundVolume;
 
 export const levels = [level1];
 
