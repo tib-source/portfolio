@@ -68,7 +68,8 @@ export function gameInit() {
 		floor: gameTile(LJS.vec2(1, 2)),
 		sand: gameTile(LJS.vec2(2, 2)),
 		water: gameTile(LJS.vec2(3, 2)),
-		grass: gameTile(LJS.vec2(4, 2))
+		grass: gameTile(LJS.vec2(4, 2)),
+		trap: gameTile(LJS.vec2(5, 2))
 	};
 
 	sceneManager.changeScene('Main');
