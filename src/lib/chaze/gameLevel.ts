@@ -39,6 +39,7 @@ tileLookup = {
 
 	potion: 16,
 	coin: 17,
+	shield: 20,
 
 	wall: 32,
 	floor: 33
@@ -109,6 +110,13 @@ function loadLevelData(level: number) {
 
 				if (tileData == tileLookup.bishop) {
 					new GameObjects.Bishop(objectPos);
+					mapLayer.clearData(pos, true);
+					mapLayer.clearCollisionData(pos);
+					continue;
+				}
+
+				if (tileData == tileLookup.shield) {
+					new GameObjects.Shield(objectPos);
 					mapLayer.clearData(pos, true);
 					mapLayer.clearCollisionData(pos);
 					continue;
