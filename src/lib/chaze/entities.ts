@@ -136,6 +136,16 @@ export class GameObject extends LJS.EngineObject {
 	}
 
 	render() {
+		let brightness = 0;
+		if (!this.isDead() && this.damageTimer.isSet()) {
+			// I dont understand
+			// DONT MOVE FROM THE ENEMY BLOCK, DOESNT WORK IN THE GAME OBJECT
+			// I DONT KNOW WHY
+			brightness = 0.5 * LJS.percent(this.damageTimer.get(), 0.15, 0);
+		}
+		this.additiveColor = LJS.hsl(0, 0, brightness, 0);
+
+		
 		if (this.displayHUD) {
 			let x = this.health / this.fullHealth;
 			let base = 1;
@@ -388,7 +398,6 @@ export class Enemy extends GameObject {
 		this.patrolRadius = 3;
 		this.wayPoints = [];
 		this.movementDirs = AI.directions;
-		this.movementTimer = new LJS.Timer(0.5);
 		this.bulletDamage = this.baseBulletDamage * this.buffDamageMultiplier;
 		this.baseFireRate = 0.5;
 		this.nearbyAllies = [];
@@ -398,18 +407,13 @@ export class Enemy extends GameObject {
 		this.shootTimer = new LJS.Timer(0);
 		this.reloadTimer = new LJS.Timer(0);
 		this.bishopBuffTimer = new LJS.Timer(0);
-        this.movementInterval = 0.25
+        this.movementInterval = 0.30
+		this.movementTimer = new LJS.Timer(0);
+
     }
 
 	update(): void {
-		let brightness = 0;
-		if (!this.isDead() && this.damageTimer.isSet()) {
-			// I dont understand
-			// DONT MOVE FROM THE ENEMY BLOCK, DOESNT WORK IN THE GAME OBJECT
-			// I DONT KNOW WHY
-			brightness = 0.5 * LJS.percent(this.damageTimer.get(), 0.15, 0);
-		}
-		this.additiveColor = LJS.hsl(0, 0, brightness, 0);
+
 		switch (this.state) {
 			case ENEMY_STATE.IDLE:
 				break; // do nothing
@@ -482,7 +486,7 @@ export class Enemy extends GameObject {
 		}
 
 		this.nextPos = this.wayPoints.pop();
-		if (this.nextPos && this.movementTimer.elapsed()) {
+		if (this.nextPos && (this.movementTimer.elapsed())) {
 			this.applyForce(
 				this.nextPos.subtract(this.pos).normalize(1).multiply(vec2(this.buffSpeedMultiplier))
 			);
@@ -519,7 +523,7 @@ export class Enemy extends GameObject {
 
 	canSeePlayer() {
 		if (Game.player.pos.distance(this.pos) < 10)
-			return AI.getNearbyObjectBFS(this, 6, Player, undefined, Game.player).length > 0;
+			return AI.getNearbyObjectBFS(this, 8, Player, undefined, Game.player).length > 0;
 		return false;
 	}
 

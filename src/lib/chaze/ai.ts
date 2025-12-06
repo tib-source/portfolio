@@ -84,7 +84,7 @@ export function getNearbyObjectBFS<T extends GameObject>(
 	queue.push(startNode);
 
 	while (queue.length > 0) {
-		let curr = queue.shift();
+		let curr = queue.pop();
 		if (curr) {
 			if (debugEnemyPathFinder) {
 				LJS.debugPoint(curr, LJS.BLUE, 0.1);
@@ -95,9 +95,12 @@ export function getNearbyObjectBFS<T extends GameObject>(
 
 			if (curr.x >= maxX || curr.y >= maxY || curr.x <= minX || curr.y <= minY) continue;
 
-			const objects = LJS.engineObjectsCollect(curr, LJS.vec2(2));
+			const objects = LJS.engineObjectsCollect(curr, LJS.vec2(1));
 			for (let obj of objects) {
 				if (obj instanceof ObjectType && obj !== o) {
+					if (optimiseForObject && obj == optimiseForObject){
+						return [obj]
+					}
 					available.push(obj);
 				}
 			}

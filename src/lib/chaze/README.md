@@ -9,7 +9,7 @@ Chaze is a top down shooter which features chess pieces with guns that can shoot
 
 <div align="center">
 
-![][image1]![][image2]
+![][image1] ![][image2]
 
 *figure(1): FSM's that dictate NPC behaviour*
 
@@ -176,23 +176,23 @@ Using this engine meant that I could not use pre built tools like Unity’s NavM
 Little JS official repository : [https://github.com/KilledByAPixel/LittleJS](https://github.com/KilledByAPixel/LittleJS)
 
 
-[image1]: docs/image1.png
+[image1]: docs/image01.png
 
-[image2]: docs/image2.png
+[image2]: docs/image02.png
 
-[image3]: docs/image3.png
+[image3]: docs/image03.png
 
-[image4]: docs/image4.png
+[image4]: docs/image04.png
 
-[image5]: docs/image5.png
+[image5]: docs/image05.png
 
-[image6]: docs/image6.png
+[image6]: docs/image06.png
 
-[image7]: docs/image7.png
+[image7]: docs/image07.png
 
-[image8]: docs/image8.png
+[image8]: docs/image08.png
 
-[image9]: docs/image9.png
+[image9]: docs/image09.png
 
 [image10]: docs/image10.png
 
